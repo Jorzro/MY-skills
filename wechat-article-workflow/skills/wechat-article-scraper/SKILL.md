@@ -175,7 +175,7 @@ def crawl_with_cookie(cookies, target):
 ```python
 from playwright.sync_api import sync_playwright
 
-def sogou_xxxxxxxx_search(query):
+def sogou_stealth_search(query):
     """搜狗微信搜索 + Stealth模式"""
     
     with sync_playwright() as p:
@@ -264,7 +264,7 @@ def smart_crawl(target, input_type):
     methods = [
         ('cookie', crawl_with_cookie),      # 优先Cookie
         ('selenium', selenium_login_crawl),  # 次选Selenium
-        ('sogou', sogou_xxxxxxxx_search),    # 备选搜狗
+        ('sogou', sogou_stealth_search),    # 备选搜狗
     ]
     
     # 依次尝试
@@ -346,7 +346,7 @@ for article in result:
 url = "https://mp.weixin.qq.com/s/xxxxx"
 
 # 先尝试搜狗方案
-result = sogou_xxxxxxxx_crawl(url)
+result = sogou_stealth_crawl(url)
 
 # 失败则用Cookie
 if not result:
@@ -361,7 +361,7 @@ print(result['content'])
 query = "OpenClaw 教程"
 
 # 使用搜狗搜索
-results = sogou_xxxxxxxx_search(query)
+results = sogou_stealth_search(query)
 
 for r in results:
     print(f"{r['title']}: {r['url']}")
