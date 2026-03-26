@@ -15,31 +15,29 @@ git clone https://github.com/Jorzro/MY-skills.git ~/MY-skills
 cd ~/MY-skills/wechat-article-workflow
 ```
 
-### 第二步：一键安装
+### 第二步：一键安装（全部自动）
 
 ```bash
 bash install.sh
 ```
 
-安装脚本会自动把主工作流、13 个子技能、发布脚本全部复制到正确位置。
+> install.sh 会自动完成：
+> - 安装全局工具（wenyan-cli）
+> - 安装主工作流 SKILL
+> - 安装热点扫描脚本
+> - 安装发布脚本
+> - 安装 14 个子技能到正确路径
+> - 安装各技能需要的 npm / Python 依赖
 
-### 第三步：配置凭证
+### 第三步：配置凭证 + 开始写文章
 
 ```bash
 # 在 ~/.bashrc 中添加：
 export WECHAT_APP_ID=你的AppID
 export WECHAT_APP_SECRET=你的AppSecret
-
-# 安装发布工具：
-npm install -g @wenyan-md/cli
-
-# 使配置生效：
 source ~/.bashrc
-```
 
-### 第四步：开始写文章
-
-```
+# 然后发送这句话给 AI：
 用公众号文章工作流，写一篇关于 [你的选题] 的文章
 ```
 
@@ -62,7 +60,7 @@ bash install.sh
 ```bash
 npx clawhub@latest install wechat-article-workflow
 ```
-> ⚠️ 注意：ClawHub（clawhub.com）近期限流，建议优先使用方式一或方式二。
+> ⚠️ ClawHub（clawhub.com）近期限流，建议优先使用方式一或方式二。
 
 ---
 
@@ -93,8 +91,9 @@ wechat-article-workflow/
 ├── SKILL.md                 # 工作流主 Skill
 ├── install.sh               # ⭐ 一键安装脚本（运行这个即可）
 ├── scripts/
-│   └── publish.sh           # 微信公众号发布脚本
-└── skills/                  # 13 个子技能
+│   ├── publish.sh           # 微信公众号发布脚本
+│   └── daily-hot-topics.js # 热点扫描脚本
+└── skills/                  # 14 个子技能（每个是独立目录）
     ├── hot-topics/
     ├── six-thinking-hats/
     ├── humanize-writing/
@@ -113,35 +112,48 @@ wechat-article-workflow/
 
 ---
 
-## 依赖 Skill
+## 环境要求
 
-| Skill | 用途 | 安装到 |
-|-------|------|--------|
-| `hot-topics` | 热点扫描 | `~/.agents/skills/` |
-| `x-twitter` | 国际热点 | `~/.agents/skills/` |
-| `marketing-psychology` | 读者心理 | `~/.agents/skills/` |
-| `deep-research` | 企业调研 | `~/.agents/skills/` |
-| `news-aggregator` | 新闻聚合 | `~/.agents/skills/` |
-| `wechat-article-scraper` | 微信爬虫 | `~/.agents/skills/` |
-| `six-thinking-hats` | 六帽分析 | `~/.agents/skills/` |
-| `copywriting` | 文案框架 | `~/.agents/skills/` |
-| `humanize-writing` | AI 去味 | `~/.agents/skills/` |
-| `content quality-auditor` | 内容质检 | `~/.openclaw/workspace/skills/` |
-| `storytelling` | 故事框架 | `~/.openclaw/workspace/skills/` |
-| `ai-humanizer` | 二次去味 | `~/.openclaw/workspace/skills/` |
-| `academic-deep-research` | 学术调研 | `~/.openclaw/workspace/skills/` |
-| `wechat-mp-writer` | 正文写作 | `~/.openclaw/workspace/skills/` |
-| `wechat-publisher` | 发布脚本 | `~/.openclaw/workspace/skills/` |
+| 项目 | 最低版本 | 说明 |
+|------|-----------|------|
+| Node.js | ≥ 18.0 | 用于热点脚本和部分技能 |
+| Python | ≥ 3.10 | 用于深度调研和新闻聚合技能 |
+| npm | ≥ 9.0 | 安装全局工具和技能依赖 |
+
+> install.sh 会自动检查并安装 `wenyan-cli`（npm 全局工具），
+> 其余依赖（npm / Python 包）也会在安装过程中自动处理。
+
+---
+
+## 子技能安装路径
+
+| Skill | 安装到 |
+|-------|--------|
+| `hot-topics` | `~/.agents/skills/` |
+| `x-twitter` | `~/.agents/skills/` |
+| `marketing-psychology` | `~/.agents/skills/` |
+| `deep-research` | `~/.agents/skills/` |
+| `news-aggregator` | `~/.agents/skills/` |
+| `wechat-article-scraper` | `~/.agents/skills/` |
+| `six-thinking-hats` | `~/.agents/skills/` |
+| `copywriting` | `~/.agents/skills/` |
+| `humanize-writing` | `~/.agents/skills/` |
+| `content quality-auditor` | `~/.openclaw/workspace/skills/` |
+| `storytelling` | `~/.openclaw/workspace/skills/` |
+| `ai-humanizer` | `~/.openclaw/workspace/skills/` |
+| `academic-deep-research` | `~/.openclaw/workspace/skills/` |
+| `wechat-mp-writer` | `~/.openclaw/workspace/skills/` |
+| `wechat-publisher` | `~/.openclaw/workspace/skills/` |
 
 ---
 
 ## 常见问题
 
 ### Q1：发布报错 "ip not in whitelist"
-**解决**：登录微信公众平台 → 开发 → 基本配置 → IP白名单 → 添加你的公网 IP
+**解决**：微信公众平台 → 开发 → 基本配置 → IP白名单 → 添加你的公网 IP（用 `curl ifconfig.me` 查）
 
 ### Q2：报错 "未能找到文章封面"
-**解决**：确保 Markdown 文件顶部有完整 frontmatter：
+**解决**：Markdown 文件顶部 frontmatter 必须包含：
 ```yaml
 ---
 title: 文章标题
@@ -149,10 +161,15 @@ cover: ./cover.jpg
 ---
 ```
 
-### Q3：wenyan-cli 安装失败
+### Q3：install.sh 报某技能 npm install 失败
+**解决**：手动进入该技能目录运行 `npm install`，或确保 Node.js 版本 ≥ 18.0
+
+### Q4：热点扫描脚本报错
+**解决**：
 ```bash
-npm install -g @wenyan-md/cli
+node ~/.openclaw/workspace-content/scripts/daily-hot-topics.js
 ```
+确保 Node.js ≥ 18.0。
 
 ---
 
@@ -163,5 +180,5 @@ npm install -g @wenyan-md/cli
 ---
 
 **维护者**：Jorzro  
-**版本**：v1.1（可一键安装）  
+**版本**：v1.2（含一键安装）  
 **最后更新**：2026-03-27

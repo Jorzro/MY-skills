@@ -1,26 +1,21 @@
 #!/usr/bin/env bash
-# wechat-publisher: 一键发布 Markdown 到微信公众号草稿箱
+# wechat-publisher: 发布 Markdown 到微信公众号草稿箱
 # Usage: ./publish.sh <markdown-file> [theme] [highlight]
-#
-# 前置要求：
-# 1. 安装 wenyan-cli: npm install -g @wenyan-md/cli
-# 2. 配置环境变量 WECHAT_APP_ID 和 WECHAT_APP_SECRET
-#    （在 ~/.bashrc 或 ~/.zshrc 中添加：
-#      export WECHAT_APP_ID=你的AppID
-#      export WECHAT_APP_SECRET=你的AppSecret）
 
 set -e
 
+# 颜色定义
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
-NC='\033[0m'
+NC='\033[0m' # No Color
 
+# 默认配置
 DEFAULT_THEME="lapis"
 DEFAULT_HIGHLIGHT="solarized-light"
-
 TOOLS_MD="$HOME/.openclaw/workspace/TOOLS.md"
 
+# 检查 wenyan-cli 是否安装
 check_wenyan() {
     if ! command -v wenyan &> /dev/null; then
         echo -e "${RED}❌ wenyan-cli 未安装！${NC}"
@@ -35,6 +30,7 @@ check_wenyan() {
     fi
 }
 
+# 从 TOOLS.md 读取环境变量
 load_credentials() {
     if [ -z "$WECHAT_APP_ID" ] || [ -z "$WECHAT_APP_SECRET" ]; then
         if [ -f "$TOOLS_MD" ]; then
@@ -45,21 +41,30 @@ load_credentials() {
     fi
 }
 
+# 检查环境变量
 check_env() {
     load_credentials
+    
     if [ -z "$WECHAT_APP_ID" ] || [ -z "$WECHAT_APP_SECRET" ]; then
         echo -e "${RED}❌ 环境变量未设置！${NC}"
-        echo -e "${YELLOW}请在 ~/.bashrc 或 ~/.zshrc 中添加：${NC}"
+        echo -e "${YELLOW}请在 TOOLS.md 中添加微信公众号凭证：${NC}"
         echo ""
-        echo "  export WECHAT_APP_ID=你的AppID"
-        echo "  export WECHAT_APP_SECRET=你的AppSecret"
+        echo "  ## 🔐 WeChat Official Account (微信公众号)"
+        echo "  "
+        echo "  export WECHAT_APP_ID=your_app_id"
+        echo "  export WECHAT_APP_SECRET=your_app_secret"
         echo ""
-        echo -e "${YELLOW}或者运行配置脚本：${NC}"
-        echo "  ./scripts/setup.sh"
+        echo -e "${YELLOW}或者手动设置环境变量：${NC}"
+        echo "  export WECHAT_APP_ID=your_app_id"
+        echo "  export WECHAT_APP_SECRET=your_app_secret"
+        echo ""
+        echo -e "${YELLOW}或者运行：${NC}"
+        echo "  source ./scripts/setup.sh"
         exit 1
     fi
 }
 
+# 检查文件是否存在
 check_file() {
     local file="$1"
     if [ ! -f "$file" ]; then
@@ -68,6 +73,7 @@ check_file() {
     fi
 }
 
+# 发布函数
 publish() {
     local file="$1"
     local theme="${2:-$DEFAULT_THEME}"
@@ -79,6 +85,7 @@ publish() {
     echo "  代码高亮: $highlight"
     echo ""
     
+    # 执行发布
     wenyan publish -f "$file" -t "$theme" -h "$highlight"
     
     if [ $? -eq 0 ]; then
@@ -92,12 +99,13 @@ publish() {
         echo -e "${YELLOW}💡 常见问题：${NC}"
         echo "  1. IP 未在白名单 → 添加到公众号后台"
         echo "  2. Frontmatter 缺失 → 文件顶部添加 title + cover"
-        echo "  3. API 凭证错误 → 检查凭证是否正确"
+        echo "  3. API 凭证错误 → 检查 TOOLS.md 中的凭证"
         echo "  4. 封面尺寸错误 → 需要 1080×864 像素"
         exit 1
     fi
 }
 
+# 显示帮助
 show_help() {
     echo "Usage: $0 <markdown-file> [theme] [highlight]"
     echo ""
@@ -109,9 +117,15 @@ show_help() {
     echo "Available themes:"
     echo "  default, lapis, phycat, ..."
     echo "  Run 'wenyan theme -l' to see all themes"
+    echo ""
+    echo "Available highlights:"
+    echo "  atom-one-dark, atom-one-light, dracula, github-dark, github,"
+    echo "  monokai, solarized-dark, solarized-light, xcode"
 }
 
+# 主函数
 main() {
+    # 检查参数
     if [ $# -eq 0 ] || [ "$1" == "-h" ] || [ "$1" == "--help" ]; then
         show_help
         exit 0
@@ -121,10 +135,14 @@ main() {
     local theme="$2"
     local highlight="$3"
     
+    # 执行检查
     check_wenyan
     check_env
     check_file "$file"
+    
+    # 发布文章
     publish "$file" "$theme" "$highlight"
 }
 
+# 运行
 main "$@"
