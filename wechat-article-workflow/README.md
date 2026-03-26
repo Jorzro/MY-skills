@@ -1,5 +1,30 @@
 # 公众号文章 AI 写作工作流
 
+> ## 🚀 For AI Agent（AI Agent 直接执行）
+>
+> **安装**（复制到正确路径后即可使用）：
+> ```bash
+> # 克隆仓库后，进入目录，运行安装脚本
+> bash install.sh
+> ```
+>
+> **使用**（AI Agent 直接发送这句话即可启动完整工作流）：
+> ```
+> 用公众号文章工作流，写一篇关于 [你的选题] 的公众号文章
+> ```
+>
+> 工作流会自动执行：热点扫描 → 选题确认 → 深度调研 → 六帽分析 → 写作 → AI去味 → 质检 → 发布到草稿箱
+>
+> **凭证配置**（使用发布功能前必须）：
+> ```bash
+> export WECHAT_APP_ID=你的AppID
+> export WECHAT_APP_SECRET=你的AppSecret
+> ```
+>
+> ---
+
+
+
 > 从热点发现到公众号草稿箱发布，全自动跑完，不需要人工拼接。
 
 **仓库地址：** https://github.com/Jorzro/MY-skills/tree/main/wechat-article-workflow
