@@ -2,7 +2,12 @@
 
 > ## 🚀 For AI Agent（AI Agent 直接执行）
 >
-> **安装**（复制到正确路径后即可使用）：
+> **安装**（从本仓库一键安装，无需联网）：
+> ```bash
+> git clone https://github.com/Jorzro/MY-skills.git ~/MY-skills
+> cd ~/MY-skills/wechat-article-workflow
+> bash install.sh
+> ```
 > ```bash
 > # 克隆仓库后，进入目录，运行安装脚本
 > bash install.sh
@@ -70,22 +75,19 @@ source ~/.bashrc
 
 ## 安装方式选择
 
-### 方式一：本仓库一键安装（最推荐）
+### 方式一：本仓库一键安装（✅ 唯一推荐）
 ```bash
 git clone https://github.com/Jorzro/MY-skills.git ~/MY-skills
 cd ~/MY-skills/wechat-article-workflow
 bash install.sh
 ```
-**优点**：无需网络，不依赖任何平台，clone 即可用。
+> **推荐原因**：本仓库已包含所有技能的完整文件，无需联网，clone 即可用，不存在版本差异。
 
-### 方式二：腾讯 Skill 市场安装（国内用户推荐）
-访问 https://skillhub.tencent.com/ 搜索安装。
-
-### 方式三：ClawHub 安装（可能限速）
+### 方式二：clawhub 安装（备选，⚠️ 注意版本差异）
 ```bash
 npx clawhub@latest install wechat-article-workflow
 ```
-> ⚠️ ClawHub（clawhub.com）近期限流，建议优先使用方式一或方式二。
+> ⚠️ 注意：clawhub 上的同名 skill 与本仓库版本可能存在差异，优先使用方式一。
 
 ---
 
