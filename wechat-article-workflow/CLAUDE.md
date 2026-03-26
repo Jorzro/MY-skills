@@ -42,7 +42,7 @@ wechat-article-workflow/
 
 ## AI Agent 安装指南
 
-### 方式一：直接从本仓库安装（推荐）
+### 方式一：从本仓库直接安装（最推荐）
 
 ```bash
 # 1. 克隆仓库
@@ -60,13 +60,21 @@ cp ~/MY-skills/wechat-article-workflow/skills/*.md \
 ls ~/.agents/skills/ | grep -E "hot-topics|six-thinking|humanize|copywriting"
 ```
 
-### 方式二：通过 clawhub 安装（如已发布到 clawhub）
+### 方式二：通过腾讯 Skill 市场安装（推荐国内用户）
+
+访问：https://skillhub.tencent.com/
+
+腾讯 Skill 市场是国内的 AI Agent 技能平台，访问稳定，不限流。直接在平台上搜索并安装所需技能。
+
+### 方式三：通过 ClawHub 安装（可能限速）
 
 ```bash
 npx clawhub@latest install wechat-article-workflow
 ```
 
-### 方式三：逐个安装所需技能
+> ⚠️ 注意：ClawHub（clawhub.com）近期访问人数较多，安装可能限速。优先使用**方式一（从本仓库安装）**或**方式二（腾讯 Skill 市场）**。
+
+### 方式四：逐个安装所需技能
 
 ```bash
 # 核心技能（必须）
@@ -218,5 +226,6 @@ cover: ./cover.jpg
 
 - OpenClaw 文档：https://docs.openclaw.ai
 - ClawHub（Skill 市场）：https://clawhub.com
+- 腾讯 Skill 市场：https://skillhub.tencent.com/（国内用户推荐，访问稳定）
 - wenyan-cli：https://github.com/caol64/wen-cli
 - 微信公众号 API：https://developers.weixin.qq.com/doc/offiaccount/

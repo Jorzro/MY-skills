@@ -109,23 +109,26 @@ cover: ./cover.jpg
 
 本工作流调用以下子技能（需已安装）：
 
-| Skill | 用途 | 安装 |
-|-------|------|------|
-| `hot-topics` | 热点扫描 | clawhub |
-| `x-twitter` | 国际热点 | clawhub |
-| `marketing-psychology` | 读者心理 | clawhub |
-| `academic-deep-research` | 学术调研 | clawhub |
-| `deep-research` | 企业调研 | clawhub |
-| `wechat-article-scraper` | 微信爬虫 | clawhub |
-| `news-aggregator` | 新闻聚合 | clawhub |
-| `six-thinking-hats` | 六帽分析 | clawhub |
-| `storytelling` | 故事框架 | clawhub |
-| `copywriting` | 文案框架 | clawhub |
-| `wechat-mp-writer` | 正文写作 | clawhub |
-| `humanize-writing` | AI 去味 | clawhub |
-| `ai-humanizer` | 二次去味 | clawhub |
-| `content-quality-auditor` | 内容质检 | clawhub |
-| `wechat-publisher` | 发布脚本 | clawhub |
+> 💡 国内用户推荐使用 [腾讯 Skill 市场](https://skillhub.tencent.com/) 安装，访问稳定不限流。ClawHub（clawhub.com）近期限流，可作为备选。
+
+| Skill | 用途 | 安装源 |
+|-------|------|--------|
+| `hot-topics` | 热点扫描 | 腾讯 Skill 市场 / ClawHub |
+| `x-twitter` | 国际热点 | 腾讯 Skill 市场 / ClawHub |
+| `marketing-psychology` | 读者心理 | 腾讯 Skill 市场 / ClawHub |
+| `academic-deep-research` | 学术调研 | 腾讯 Skill 市场 / ClawHub |
+| `deep-research` | 企业调研 | 腾讯 Skill 市场 / ClawHub |
+| `wechat-article-scraper` | 微信爬虫 | 腾讯 Skill 市场 / ClawHub |
+| `news-aggregator` | 新闻聚合 | 腾讯 Skill 市场 / ClawHub |
+| `six-thinking-hats` | 六帽分析 | 腾讯 Skill 市场 / ClawHub |
+| `storytelling` | 故事框架 | 腾讯 Skill 市场 / ClawHub |
+| `copywriting` | 文案框架 | 腾讯 Skill 市场 / ClawHub |
+| `wechat-mp-writer` | 正文写作 | 腾讯 Skill 市场 / ClawHub |
+| `humanize-writing` | AI 去味 | 腾讯 Skill 市场 / ClawHub |
+| `ai-humanizer` | 二次去味 | 腾讯 Skill 市场 / ClawHub |
+| `content quality-auditor` | 内容质检 | 腾讯 Skill 市场 / ClawHub |
+| `wechat-publisher` | 发布脚本 | 腾讯 Skill 市场 / ClawHub |
+
 
 ## 注意事项
 
