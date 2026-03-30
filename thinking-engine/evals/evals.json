@@ -1,0 +1,23 @@
+{
+  "skill_name": "thinking-engine",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "我现在在某大厂做P7，年薪大概80万，最近拿到一家AIGC创业公司的CTO offer，但需要降薪40%过去全职。朋友说这是难得的机会，但我有家庭要养房贷压力很大。我到底该不该去？",
+      "expected_output": "需要完成复杂度评分(≥8)，触发Regret Minimization + Circle of Competence + Expected Value框架，输出结论先行的决策建议，标注使用的框架",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "朋友拉我投一个AI SaaS项目，说估值1500万，首期需要投50万占股。他说今年预计营收800万，明年2000万。我该怎么判断这个投资机会靠不靠谱？",
+      "expected_output": "需要完成复杂度评分(≥7)，触发BATNA + Margin of Safety + Asymmetric Risk框架，给出投资评估结论，包含风险提示和具体判断依据",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "我们产品经理和研发吵起来了，PM说要快速上线抢占市场，研发说现在的架构不重构根本做不了，技术债太重。双方都觉得自己对，作为负责人我该怎么判断和决策？",
+      "expected_output": "需要完成复杂度评分(≥6)，触发5 Whys + Structured Disagreement + RACI框架，先分析根本原因，再给出团队决策建议，结论需平衡双方立场",
+      "files": []
+    }
+  ]
+}
