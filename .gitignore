@@ -1,0 +1,13 @@
+# Credentials
+.env
+.env.local
+*.env
+*.token
+*.key
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
