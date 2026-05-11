@@ -51,6 +51,12 @@ Agent 应该安装整个 `ai-hot-radar` 目录，不要只复制 `SKILL.md`。
 https://raw.githubusercontent.com/Jorzro/MY-skills/refs/heads/main/ai-hot-radar/SKILL.md
 ```
 
+如果当前网络访问 `raw.githubusercontent.com` 不稳定，可让 Agent 用 GitHub Contents API 读取同一个文件：
+
+```text
+https://api.github.com/repos/Jorzro/MY-skills/contents/ai-hot-radar/SKILL.md?ref=main
+```
+
 更完整的 Agent 安装和调用说明见 `AGENT_USAGE.md`。
 
 ### 方式 C：一行命令手动装
@@ -58,14 +64,16 @@ https://raw.githubusercontent.com/Jorzro/MY-skills/refs/heads/main/ai-hot-radar/
 默认安装到 OpenClaw：
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/Jorzro/MY-skills/refs/heads/main/ai-hot-radar/install.sh | bash
+curl -fsSL -H 'Accept: application/vnd.github.raw' \
+  'https://api.github.com/repos/Jorzro/MY-skills/contents/ai-hot-radar/install.sh?ref=main' | bash
 ```
 
 安装到 Codex：
 
 ```bash
 SKILL_DIR=$HOME/.codex/skills/ai-hot-radar \
-  bash <(curl -fsSL https://raw.githubusercontent.com/Jorzro/MY-skills/refs/heads/main/ai-hot-radar/install.sh)
+  bash <(curl -fsSL -H 'Accept: application/vnd.github.raw' \
+    'https://api.github.com/repos/Jorzro/MY-skills/contents/ai-hot-radar/install.sh?ref=main')
 ```
 
 常见位置示例：
