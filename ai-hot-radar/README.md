@@ -20,6 +20,8 @@ AI Hot Radar 是一个面向 OpenClaw / Codex / Claude Code / Cursor 等 Agent �
 
 ```text
 ai-hot-radar/
+├── AGENT_USAGE.md
+├── install.sh
 ├── README.md
 ├── SKILL.md
 ├── agents/
@@ -31,7 +33,40 @@ ai-hot-radar/
 
 ## 安装
 
-把整个 `ai-hot-radar` 文件夹放到你的 Agent skill 目录里。
+### 方式 A：让 Agent 自动装
+
+在你的 Agent 里直接发这句话：
+
+```text
+帮我安装这个 skill：https://github.com/Jorzro/MY-skills/tree/main/ai-hot-radar
+```
+
+Agent 应该安装整个 `ai-hot-radar` 目录，不要只复制 `SKILL.md`。
+
+### 方式 B：原始入口文件
+
+如果 Agent 需要读取原始入口文件：
+
+```text
+https://raw.githubusercontent.com/Jorzro/MY-skills/main/ai-hot-radar/SKILL.md
+```
+
+更完整的 Agent 安装和调用说明见 `AGENT_USAGE.md`。
+
+### 方式 C：一行命令手动装
+
+默认安装到 OpenClaw：
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/Jorzro/MY-skills/main/ai-hot-radar/install.sh | bash
+```
+
+安装到 Codex：
+
+```bash
+SKILL_DIR=$HOME/.codex/skills/ai-hot-radar \
+  bash <(curl -fsSL https://raw.githubusercontent.com/Jorzro/MY-skills/main/ai-hot-radar/install.sh)
+```
 
 常见位置示例：
 
