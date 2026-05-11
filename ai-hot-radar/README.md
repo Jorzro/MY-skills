@@ -48,7 +48,7 @@ Agent 应该安装整个 `ai-hot-radar` 目录，不要只复制 `SKILL.md`。
 如果 Agent 需要读取原始入口文件：
 
 ```text
-https://raw.githubusercontent.com/Jorzro/MY-skills/main/ai-hot-radar/SKILL.md
+https://raw.githubusercontent.com/Jorzro/MY-skills/refs/heads/main/ai-hot-radar/SKILL.md
 ```
 
 更完整的 Agent 安装和调用说明见 `AGENT_USAGE.md`。
@@ -58,14 +58,14 @@ https://raw.githubusercontent.com/Jorzro/MY-skills/main/ai-hot-radar/SKILL.md
 默认安装到 OpenClaw：
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/Jorzro/MY-skills/main/ai-hot-radar/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/Jorzro/MY-skills/refs/heads/main/ai-hot-radar/install.sh | bash
 ```
 
 安装到 Codex：
 
 ```bash
 SKILL_DIR=$HOME/.codex/skills/ai-hot-radar \
-  bash <(curl -fsSL https://raw.githubusercontent.com/Jorzro/MY-skills/main/ai-hot-radar/install.sh)
+  bash <(curl -fsSL https://raw.githubusercontent.com/Jorzro/MY-skills/refs/heads/main/ai-hot-radar/install.sh)
 ```
 
 常见位置示例：

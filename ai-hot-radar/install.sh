@@ -2,14 +2,14 @@
 # AI Hot Radar Agent Skill installer
 # Default: OpenClaw skill directory.
 # Override:
-#   SKILL_DIR=$HOME/.codex/skills/ai-hot-radar bash <(curl -fsSL https://raw.githubusercontent.com/Jorzro/MY-skills/main/ai-hot-radar/install.sh)
+#   SKILL_DIR=$HOME/.codex/skills/ai-hot-radar bash <(curl -fsSL https://raw.githubusercontent.com/Jorzro/MY-skills/refs/heads/main/ai-hot-radar/install.sh)
 
 set -e
 
 DEFAULT_DIR="$HOME/.openclaw/skills/ai-hot-radar"
 SKILL_DIR="${SKILL_DIR:-$DEFAULT_DIR}"
-BASE_URL="${BASE_URL:-https://raw.githubusercontent.com/Jorzro/MY-skills/main/ai-hot-radar}"
-CURL_OPTS=(-fsSL --retry 2 --connect-timeout 10 --max-time 30)
+BASE_URL="${BASE_URL:-https://raw.githubusercontent.com/Jorzro/MY-skills/refs/heads/main/ai-hot-radar}"
+CURL_OPTS=(-fsSL --retry 3 --connect-timeout 10 --max-time 60)
 
 echo ""
 echo "Installing AI Hot Radar Agent Skill"

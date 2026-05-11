@@ -23,7 +23,7 @@ Agent 应该读取整个目录，而不是只读取 `SKILL.md`。目录里包含
 如果 Agent 只接受原始 Markdown 入口，把这个地址给它：
 
 ```text
-https://raw.githubusercontent.com/Jorzro/MY-skills/main/ai-hot-radar/SKILL.md
+https://raw.githubusercontent.com/Jorzro/MY-skills/refs/heads/main/ai-hot-radar/SKILL.md
 ```
 
 然后要求它继续读取同目录下的：
@@ -39,21 +39,21 @@ agents/openai.yaml
 默认安装到 OpenClaw skill 目录：
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/Jorzro/MY-skills/main/ai-hot-radar/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/Jorzro/MY-skills/refs/heads/main/ai-hot-radar/install.sh | bash
 ```
 
 安装到 Codex：
 
 ```bash
 SKILL_DIR=$HOME/.codex/skills/ai-hot-radar \
-  bash <(curl -fsSL https://raw.githubusercontent.com/Jorzro/MY-skills/main/ai-hot-radar/install.sh)
+  bash <(curl -fsSL https://raw.githubusercontent.com/Jorzro/MY-skills/refs/heads/main/ai-hot-radar/install.sh)
 ```
 
 安装到 Claude Code：
 
 ```bash
 SKILL_DIR=$HOME/.claude/skills/ai-hot-radar \
-  bash <(curl -fsSL https://raw.githubusercontent.com/Jorzro/MY-skills/main/ai-hot-radar/install.sh)
+  bash <(curl -fsSL https://raw.githubusercontent.com/Jorzro/MY-skills/refs/heads/main/ai-hot-radar/install.sh)
 ```
 
 脚本不使用 `sudo`，只会创建目录并下载 skill 文件。
