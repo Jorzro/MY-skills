@@ -183,6 +183,8 @@ curl -sH "User-Agent: $UA" "https://aihot.virxact.com/api/public/items?mode=sele
 - 公司名、模型名、产品名。
 - 发布时间窗口。
 
+同一个 canonical URL 必须合并，即使一个来源是中文标题、另一个来源是英文标题。
+
 主条目优先级：
 
 1. `AI HOT selected`
@@ -222,6 +224,8 @@ Agent 语义校正 `20` 分：
 | `<40` | 默认忽略 |
 
 详细评分见 `references/scoring-rubric.md`。
+
+分类时要避免关键词误判：安全事故、诉讼、监管、政策、融资、合作和企业采用归到“行业动态”，即使标题里出现 ChatGPT、Claude、Gemini 等模型名；只有真正的模型发布、模型更新、能力变化或模型可用性事件才归到“模型发布/更新”。
 
 ## 记忆与心跳
 

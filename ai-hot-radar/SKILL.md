@@ -117,6 +117,11 @@ Convert every source item into this internal shape before reasoning:
 }
 ```
 
+Category correction rules:
+- Safety incidents, lawsuits, regulation, policy, funding, partnerships, and enterprise adoption belong to `industry`, even when the title mentions a model name such as ChatGPT, Claude, or Gemini.
+- Only use `ai-models` when the event is actually about a model release, model update, benchmark, capability change, model card, or model availability.
+- Only use `paper` when the item is primarily a research paper, benchmark study, evaluation, or technical research result.
+
 ## Deduplication
 Deduplicate before scoring final output.
 
@@ -126,7 +131,7 @@ Build a fingerprint from:
 - extracted company/model/product names;
 - published date rounded to a 24-hour window.
 
-Merge items when they share the same canonical URL, or when title/entity similarity is clearly the same event.
+Merge items when they share the same canonical URL, or when title/entity similarity is clearly the same event. Exact canonical URL match is a hard dedupe signal even when one title is Chinese and another is English.
 
 Choose the primary item in this priority order:
 1. `AI HOT selected`

@@ -73,6 +73,11 @@ Clamp final score to `0-100`.
 - `40-59`: Normal. Include only when user asks for full list.
 - `<40`: Ignore by default.
 
+## Category Guardrails
+- Safety incidents, lawsuits, regulation, policy, funding, partnerships, and enterprise adoption should normally be categorized as `industry`.
+- Do not classify an event as `ai-models` just because the title mentions ChatGPT, Claude, Gemini, Sora, or another model name.
+- Use `ai-models` only for model launches, model updates, model availability, model capability changes, model cards, or model benchmarks.
+
 ## Calibration Examples
 - Official frontier model launch with API availability and many sources: `92-98`.
 - Official model update or important open-source release: `78-88`.
