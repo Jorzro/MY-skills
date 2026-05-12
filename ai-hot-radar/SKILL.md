@@ -1,52 +1,42 @@
 ---
 name: ai-hot-radar
-description: Use when the user asks for AI news or Chinese prompts like "今天 AI 圈有什么", "AI 日报", "AI 热点", "最近 24 小时最重磅 AI 新闻", "OpenAI/Anthropic/Google 最近发了什么", "最近一周 AI 论文", "AI 开源项目趋势", asks for Chinese edited AI briefings, or asks to generate an AI news poster/小红书封面/朋友圈图/公众号封面. This skill fetches public AI sources, merges duplicates, scores importance from 0-100, writes Markdown memory, produces polished Chinese briefings, and can hand off poster prompts to image-generation skills such as baoyu-imagine.
+description: Use when the user asks for current AI news, AI daily briefings, AI hot topics, OpenAI/Anthropic/Google updates, AI papers, GitHub AI trends, Chinese AI news summaries, AI news scoring, or AI news posters/小红书封面/朋友圈图/公众号封面.
 metadata:
-  version: 1.1.0
+  version: 1.2.0
   category: news
-  description_zh: 融合 AI HOT、精选 AI RSS 与 GitHub AI 趋势，自动抓取 AI 资讯、去重聚合、按 100 分制判断重磅程度，输出翻译改写后的中文编辑型简报，并支持海报 prompt 或文生图 skill 联动。
+  description_zh: 融合 AI HOT、精选 AI RSS 与 GitHub AI 趋势，首次使用先完成偏好问卷，之后按文字资讯或海报图片两种模式输出中文 AI 热点简报。
 ---
 
 # AI Hot Radar
 
 ## Goal
-Use public sources to answer current AI news questions as polished Chinese editorial briefings, with deduplication, 0-100 importance scoring, optional poster generation, and persistent Markdown memory for OpenClaw heartbeats.
+Use public sources to answer current AI news questions as polished Chinese editorial briefings or generated poster images, with onboarding preferences, deduplication, 0-100 importance scoring, and persistent Markdown memory.
 
-This skill does not require a custom backend or database. Treat the Markdown files under the memory directory as the long-term state.
+No custom backend or database is required. Markdown files under the memory directory are the long-term state. Poster image mode uses OpenAI Images API through `scripts/generate_openai_poster.py` and reads the API key only from `OPENAI_API_KEY`.
 
 ## Completion Standard
-Before replying or finishing a heartbeat, verify these items:
+Before replying or finishing a heartbeat, verify:
+- First-time users completed the 5-question onboarding, or the user explicitly requested a one-off mode.
 - Relevant public sources were attempted, with failures tolerated and mentioned only if they affect coverage.
 - Items were normalized, deduplicated, scored from 0-100, and sorted by score first, recency second.
-- English titles and summaries were translated and rewritten into natural Chinese before user-facing output.
-- Each top item includes score, Chinese headline, one-sentence takeaway, importance reason, audience, and source links.
+- English titles and summaries were translated and rewritten into natural Chinese before display.
+- Text mode top items include score, Chinese headline, one-sentence takeaway, importance reason, audience, and source links.
+- Poster mode either generated an actual image file, or stopped with a clear `OPENAI_API_KEY` configuration instruction. Do not silently replace image mode with prompt-only output unless the user chose prompt-only mode.
 - Previously briefed items in `ledger.md` were not repeated unless the user explicitly asks for history.
-- The response states the time window and includes source links.
-- Poster requests either invoke an available image-generation skill/tool or return a complete reusable Chinese poster prompt.
-- For heartbeat runs, `ledger.md` and the matching `briefings/*.md` file were updated.
+- Heartbeat runs updated `ledger.md` and the matching `briefings/*.md` file when a briefing is produced.
 
 ## Persistent Memory
 Default memory root:
 
 ```bash
 MEMORY_ROOT="${AI_HOT_RADAR_MEMORY_ROOT:-$HOME/.openclaw/skills/ai-hot-radar/memory}"
-mkdir -p "$MEMORY_ROOT/briefings"
-touch "$MEMORY_ROOT/ledger.md"
-touch "$MEMORY_ROOT/interests.md"
-touch "$MEMORY_ROOT/preferences.md"
+mkdir -p "$MEMORY_ROOT/briefings" "$MEMORY_ROOT/posters"
+touch "$MEMORY_ROOT/ledger.md" "$MEMORY_ROOT/interests.md" "$MEMORY_ROOT/preferences.md"
 ```
 
-If `$HOME/.openclaw` is not writable in OpenClaw cloud, use the agent's persistent workspace and keep the same suffix: `skills/ai-hot-radar/memory`.
+If `$HOME/.openclaw` is not writable, use the agent's persistent workspace and keep the same suffix: `skills/ai-hot-radar/memory`.
 
-Required files:
-- `ledger.md`: long-term event ledger.
-- `briefings/YYYY-MM-DD-morning.md`: morning briefing.
-- `briefings/YYYY-MM-DD-evening.md`: evening briefing.
-- `briefings/YYYY-MM-DD-alert-HHMM.md`: major alert.
-- `interests.md`: user focus areas and negative filters.
-- `preferences.md`: optional output and poster preferences.
-
-Initialize `ledger.md` with this header when it is empty:
+Initialize `ledger.md` when empty:
 
 ```markdown
 # AI Hot Radar Ledger
@@ -55,51 +45,104 @@ Initialize `ledger.md` with this header when it is empty:
 |---|---|---:|---:|---:|---|---|---:|---|
 ```
 
-Initialize `interests.md` with this template when it is empty:
+Initialize `interests.md` after onboarding:
 
 ```markdown
 # AI Hot Radar Interests
 
 ## Focus
-- frontier models
-- AI agents
-- developer tools
-- AI product launches
-- open source AI projects
+- 模型发布/能力更新
+- AI Agent/自动化
+- 开源项目/GitHub 趋势
+- 产品发布/工具
+
+## Audience
+- 创业者/投资人
+- 开发者
 
 ## Negative Filters
-- generic prompt tips
-- recycled listicles
-- old tutorials without new release information
+- 普通教程
+- Prompt 技巧
+- 炒冷饭资讯
 ```
 
-Initialize `preferences.md` with this template when it is empty:
+Initialize `preferences.md` after onboarding:
 
 ```markdown
 # AI Hot Radar Preferences
 
+onboarding_completed: true
+
 ## Output
 language: zh-CN
 style: editorial
+output_mode: ask
+ask_each_time: true
 show_original_title: false
 
 ## Poster
 enabled: true
-default_ratio: 9:16
-default_style: editorial-tech
-image_skill: baoyu-imagine
-fallback: prompt
+poster_mode: image
+poster_provider: openai
+image_model: gpt-image-1.5
+image_size: 1024x1536
+image_quality: medium
+api_key_env: OPENAI_API_KEY
+prompt_fallback: false
+
+## Heartbeat
+heartbeat_output_mode: text
+timezone: Asia/Shanghai
 ```
 
+## Onboarding Questionnaire
+If `preferences.md` is missing, empty, or does not contain `onboarding_completed: true`, stop and ask the user these 5 questions before fetching news. After the user answers, write `preferences.md` and `interests.md`, then continue only if the original request still has enough context.
+
+Use concise Chinese multiple-choice wording:
+
+```markdown
+首次使用 AI Hot Radar，需要先做 5 个偏好选择，之后你可以随时说“重新配置 AI 热点偏好”修改。
+
+1. 输出方式：A 文字资讯 / B 海报图片 / C 每次先问我
+2. 关注方向，可多选：A 模型发布/能力更新 / B AI Agent/自动化 / C 开源项目/GitHub 趋势 / D 产品发布/工具 / E 行业融资/大厂动态 / F 论文研究
+3. 受众视角，可多选：A 创业者/投资人 / B 开发者 / C 产品/运营 / D 研究者 / E 企业采购/管理者
+4. 不想看什么，可多选：A 普通教程 / B Prompt 技巧 / C 炒冷饭资讯 / D 低质量营销稿 / E 暂时不过滤
+5. 海报配置：A 启用 OpenAI Images API 直接出图 / B 只生成海报 prompt / C 暂不启用海报
+```
+
+Default choices when the user says "按默认":
+- Output: `ask`
+- Focus: 模型发布/能力更新, AI Agent/自动化, 开源项目/GitHub 趋势, 产品发布/工具
+- Audience: 创业者/投资人, 开发者
+- Negative filters: 普通教程, Prompt 技巧, 炒冷饭资讯
+- Poster: OpenAI Images API direct image
+
+Mode update commands:
+- "重新配置 AI 热点偏好": run the questionnaire again and overwrite preferences/interests.
+- "切换成文字模式": set `output_mode: text`, `ask_each_time: false`.
+- "切换成海报模式": set `output_mode: poster`, `ask_each_time: false`, keep poster API settings.
+- "每次都问我": set `output_mode: ask`, `ask_each_time: true`.
+
+## Mode Selection
+Resolve output mode before fetching unless the user explicitly asked for onboarding or history:
+
+1. Direct wording wins for the current request:
+   - Text mode: "文字版", "简报", "资讯", "列表", "日报", "周报".
+   - Poster mode: "海报", "图片", "做成图", "小红书封面", "朋友圈图", "公众号封面".
+2. If no direct wording, read `preferences.md`.
+3. If `output_mode: ask` or `ask_each_time: true`, ask: `这次要哪种输出？A 文字资讯 / B 海报图片` and wait for the choice.
+4. Heartbeats default to `heartbeat_output_mode: text` unless preferences explicitly set poster.
+
+Do not generate both formats by default. If the user asks for both, produce text first, then poster.
+
 ## Routing
-Use the user's wording to choose the workflow:
+Use the user's wording to choose the data workflow:
 - Broad questions such as "今天 AI 圈有什么", "最近 AI 有什么大事", "过去 24 小时 AI 新闻": fetch `AI HOT selected` plus high-quality RSS for the requested window.
 - "日报": fetch `AI HOT daily`; only use this route when the user explicitly says "日报".
 - "全部", "完整", "所有", "全量": fetch `AI HOT all`.
 - Company or topic questions such as "OpenAI 最近发了什么", "Sora 相关": fetch `AI HOT items?q=<keyword>` plus matching RSS items.
 - Category questions: map to `ai-models`, `ai-products`, `industry`, `paper`, or `tip`.
 - GitHub or open-source questions: include GitHub AI trends.
-- Poster requests such as "生成海报", "做成图", "小红书封面", "朋友圈图", "公众号封面", "今日 AI 热点海报": first create the Chinese briefing, then follow the Poster Mode section.
 - Heartbeat prompts: follow the Heartbeat section.
 
 ## Source Fetching
@@ -109,24 +152,19 @@ Always set a browser User-Agent for AI HOT:
 UA="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
 ```
 
-AI HOT examples:
+Examples:
 
 ```bash
-# Selected items for a rolling window.
 since=$(date -u -v-24H +%Y-%m-%dT%H:%M:%SZ 2>/dev/null || date -u -d '24 hours ago' +%Y-%m-%dT%H:%M:%SZ)
 curl -sL -H "User-Agent: $UA" "https://aihot.virxact.com/api/public/items?mode=selected&since=$since&take=50"
-
-# Keyword search.
 curl -sL -H "User-Agent: $UA" "https://aihot.virxact.com/api/public/items?q=OpenAI&take=30"
-
-# Daily report.
 curl -sL -H "User-Agent: $UA" "https://aihot.virxact.com/api/public/daily"
 ```
 
 RSS and GitHub source details live in `references/source-map.md`. Read it when adding source coverage or debugging failed feeds.
 
 ## Chinese Editorial Layer
-Before producing user-facing output, convert normalized items into Chinese editorial cards:
+Before user-facing output, convert normalized items into Chinese editorial cards:
 
 ```json
 {
@@ -141,14 +179,14 @@ Before producing user-facing output, convert normalized items into Chinese edito
 ```
 
 Rules:
-- Never use an English title as the primary headline. Translate and rewrite it into concise natural Chinese.
-- Keep product, model, company, and paper names in their official form when translation would reduce recognition, e.g. OpenAI, Claude, Gemini, Sora, GitHub.
-- Do not machine-translate literally. Rewrite as a Chinese tech-media headline with clear subject, action, and impact.
-- If the user asks for original titles or details, include `原始标题：...` under the item; otherwise hide original English titles.
-- Read `references/output-style.md` when producing a briefing, daily report, company report, or any user-facing summary.
+- Never use an English title as the primary headline.
+- Keep official names recognizable: OpenAI, Claude, Gemini, Sora, GitHub, Hugging Face, DeepMind, Meta, Mistral, Llama.
+- Rewrite as a Chinese tech-media headline with clear subject, action, and impact.
+- Hide original English titles unless the user asks for original text, details, or audit trail.
+- Read `references/output-style.md` for briefing and poster copy rules.
 
-## Normalize Items
-Convert every source item into this internal shape before reasoning:
+## Normalize, Deduplicate, Score
+Normalize every source item:
 
 ```json
 {
@@ -163,78 +201,31 @@ Convert every source item into this internal shape before reasoning:
 }
 ```
 
-Category correction rules:
-- Safety incidents, lawsuits, regulation, policy, funding, partnerships, and enterprise adoption belong to `industry`, even when the title mentions a model name such as ChatGPT, Claude, or Gemini.
-- Only use `ai-models` when the event is actually about a model release, model update, benchmark, capability change, model card, or model availability.
-- Only use `paper` when the item is primarily a research paper, benchmark study, evaluation, or technical research result.
+Deduplicate by canonical URL, normalized title, entities, and 24-hour publish window. Exact canonical URL match is a hard dedupe signal.
 
-## Deduplication
-Deduplicate before scoring final output.
-
-Build a fingerprint from:
-- lowercase title with punctuation, whitespace, tracking parameters, and common filler words removed;
-- canonical URL domain and path when available;
-- extracted company/model/product names;
-- published date rounded to a 24-hour window.
-
-Merge items when they share the same canonical URL, or when title/entity similarity is clearly the same event. Exact canonical URL match is a hard dedupe signal even when one title is Chinese and another is English.
-
-Choose the primary item in this priority order:
+Primary item priority:
 1. `AI HOT selected`
 2. official first-party source
 3. quality media or newsletter
 4. GitHub trend source
 5. social repost
 
-Keep alternate sources in a `sources` list and use them as scoring evidence.
-
-## Scoring
-Score every merged event from 0-100.
-
-Use `references/scoring-rubric.md` when scoring is central to the user request or when scores are close. The short version:
+Score every merged event from 0-100. Use `references/scoring-rubric.md` when scores are central or close:
 - Rule base: 80 points from source authority, event level, AI relevance, impact, freshness, and source confirmation.
-- Agent adjustment: 20 points from semantic judgment about market expectation, officialness, urgency, and practical action value.
+- Agent adjustment: 20 points from market expectation, officialness, urgency, and action value.
 - `90-100`: major alert.
 - `75-89`: heavyweight.
 - `60-74`: important.
 - `40-59`: normal; include only in full-list requests.
 - `<40`: ignore unless explicitly requested.
 
-`AI HOT selected` is a quality prior, not the final score.
-
 Apply `interests.md` after the base score:
-- Add up to `+8` for strong match with Focus.
-- Subtract up to `-12` for strong match with Negative Filters.
-- Never push weakly AI-related content above 60 only because it matches a focus word.
+- Add up to `+8` for strong Focus match.
+- Subtract up to `-12` for Negative Filters.
+- Tune `why_it_matters` and `audience` to the selected Audience.
 
-## Heartbeat
-Default timezone: `Asia/Shanghai`.
-
-Default schedule:
-- `08:30` morning: last 12 hours, new items with score `>=60`.
-- `20:30` evening: last 24 hours, full summary with score `>=60`, plus category sections.
-- Every 2 hours alert check: only new items with score `>=90`.
-
-Heartbeat workflow:
-1. Initialize memory files if needed.
-2. Read `ledger.md`, the latest briefing, and `interests.md`.
-3. Fetch AI HOT selected for the heartbeat window.
-4. Fetch selected RSS feeds from `references/source-map.md`; skip failed feeds.
-5. Include GitHub AI trends only for evening or explicit open-source/GitHub prompts.
-6. Normalize, deduplicate, score, and sort.
-7. Remove events whose fingerprint already has `briefed_at` unless the new score crosses 90 and status was not `alerted`.
-8. For alert checks, if no new score `>=90` item exists, do not produce a user-visible briefing; only update `last_seen_at` for observed ledger rows.
-9. Write the briefing Markdown file when a briefing is produced.
-10. Update `ledger.md` rows for all observed events.
-
-Use these status values:
-- `seen`: observed but not briefed.
-- `briefed`: included in morning/evening.
-- `alerted`: sent as major alert.
-- `suppressed`: filtered by low score or negative interest.
-
-## Output Format
-For normal user questions, answer in Chinese:
+## Text Mode Output
+Use this format in Chinese:
 
 ```markdown
 时间窗：<start> - <end>
@@ -242,7 +233,7 @@ For normal user questions, answer in Chinese:
 # 今日 AI 热点雷达
 
 ## 今日判断
-<one short paragraph summarizing the main trend across the selected items>
+<one short paragraph summarizing the main trend>
 
 ## 最值得看
 1. **<score>/100｜<Chinese title>**
@@ -262,59 +253,81 @@ For normal user questions, answer in Chinese:
 
 Keep the top section to 3-5 items unless the user asks for a full list. Mention source failures only when they materially affect the result.
 
-For alert heartbeat output:
-
-```markdown
-# AI 重大快讯
-
-**<score>/100｜<title>**
-
-为什么重要：...
-影响判断：...
-来源：...
-```
-
 For "查看最近已播报记录", read `ledger.md` and summarize recent rows by `briefed_at`, score, and status.
 
-## Poster Mode
-Trigger this mode when the user asks for a poster, cover image, social graphic, 小红书封面, 朋友圈图, 公众号封面, or "做成图".
+## Poster Image Generation
+Trigger poster mode when selected by preferences or when the user asks for "海报", "图片", "做成图", "小红书封面", "朋友圈图", or "公众号封面".
 
 Workflow:
-1. Generate the normal Chinese editorial briefing first.
-2. Select the top 3-5 items by score for the poster.
-3. Read `preferences.md` when available; default to ratio `9:16`, style `editorial-tech`, and image skill `baoyu-imagine`.
-4. Read `references/poster-guide.md` for the poster prompt structure.
-5. If `baoyu-imagine` or another image-generation skill/tool is available, hand off the generated poster prompt to it.
-6. If no image-generation capability is available, output a complete Chinese text-to-image prompt plus layout copy, without failing the news request.
+1. Generate the Chinese editorial cards first.
+2. Select top 3-5 items by score.
+3. Read `references/poster-guide.md`.
+4. Compress each item for image text: short Chinese title plus 7-12 character judgment.
+5. Build a complete Chinese poster prompt with title, time window, Top 5, scores, and source footer.
+6. If `poster_mode: prompt`, output the prompt only.
+7. If `poster_mode: image`, require `OPENAI_API_KEY`. If it is missing, stop and tell the user to configure it.
+8. Run:
 
-Poster output without image generation:
-
-```markdown
-## 海报生成 Prompt
-用途：小红书/朋友圈竖版资讯海报
-比例：9:16
-风格：中文科技媒体信息图，干净、高级、层次清晰，避免赛博霓虹
-
-画面文字：
-标题：今日 AI 热点雷达
-副标题：过去 24 小时最值得关注的 5 件事
-...
+```bash
+python3 scripts/generate_openai_poster.py \
+  --prompt-file "$MEMORY_ROOT/posters/latest-prompt.txt" \
+  --output-dir "$MEMORY_ROOT/posters" \
+  --model "gpt-image-1.5" \
+  --size "1024x1536" \
+  --quality "medium"
 ```
 
+9. Return the generated PNG path and, if the agent UI supports it, display the image.
+
+API key instruction when missing:
+
+```text
+海报图片模式需要 OpenAI Images API。请在 Agent Secret 或运行环境里设置 OPENAI_API_KEY，然后重新运行。
+示例：export OPENAI_API_KEY="sk-..."
+```
+
+Do not write API keys into `preferences.md`, `interests.md`, `ledger.md`, or any committed file.
+
+## Heartbeat
+Default timezone: `Asia/Shanghai`.
+
+Default schedule:
+- `08:30` morning: last 12 hours, new items with score `>=60`.
+- `20:30` evening: last 24 hours, full summary with score `>=60`, plus category sections.
+- Every 2 hours alert check: only new items with score `>=90`.
+
+Heartbeat workflow:
+1. Initialize memory files if needed.
+2. Read `ledger.md`, latest briefing, `interests.md`, and `preferences.md`.
+3. Fetch sources for the heartbeat window.
+4. Normalize, deduplicate, score, and sort.
+5. Remove events whose fingerprint already has `briefed_at` unless the new score crosses 90 and status was not `alerted`.
+6. For alert checks, if no new score `>=90` item exists, do not produce a user-visible briefing; only update `last_seen_at`.
+7. Produce text output unless `heartbeat_output_mode: poster`.
+8. Write the briefing Markdown file when a briefing is produced.
+9. Update `ledger.md` rows for all observed events.
+
+Status values: `seen`, `briefed`, `alerted`, `suppressed`.
+
 ## Failure Handling
-- AI HOT 403: retry once with the required User-Agent and say the first request was blocked by User-Agent only if the retry also fails.
+- AI HOT 403: retry once with the required User-Agent.
 - AI HOT unavailable: continue with RSS and GitHub, and label coverage as incomplete.
 - RSS feed unavailable: skip it.
 - GitHub rate limited: skip GitHub trends.
-- No new heartbeat items: avoid user-visible output for alert checks; for morning/evening say there are no new score `>=60` items.
+- No new heartbeat items: avoid user-visible output for alert checks.
+- Poster API key missing: stop with setup instructions, do not downgrade to prompt unless user chose prompt-only mode.
+- Poster API error: show the error summary and suggest checking `OPENAI_API_KEY`, organization verification, model access, and billing.
 
 ## Install Notes For OpenClaw
 Install the folder as a normal OpenClaw skill. The skill is self-contained:
 - `SKILL.md` is the main instruction file.
 - `references/scoring-rubric.md` defines scoring.
 - `references/source-map.md` defines source coverage.
+- `references/output-style.md` defines Chinese editorial output.
+- `references/poster-guide.md` defines image poster prompts.
+- `scripts/generate_openai_poster.py` generates poster PNG files via OpenAI Images API.
 
-Configure OpenClaw heartbeat prompts to invoke:
+Configure OpenClaw heartbeat prompts:
 - Morning: "使用 ai-hot-radar 执行早报心跳。"
 - Evening: "使用 ai-hot-radar 执行晚报心跳。"
 - Alert: "使用 ai-hot-radar 执行重大快讯心跳，只在有 90 分以上新增事件时输出。"

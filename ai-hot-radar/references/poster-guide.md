@@ -1,16 +1,26 @@
 # AI Hot Radar Poster Guide
 
-Use this file when the user asks for a poster, cover image, social graphic, 小红书封面, 朋友圈图, 公众号封面, or "做成图".
+Use this file when the user selects poster output or asks for a poster, image, cover, 小红书封面, 朋友圈图, 公众号封面, or "做成图".
 
-## Default Poster
+## Output Modes
 
+- `poster_mode: image`: Generate an actual PNG with OpenAI Images API. This requires `OPENAI_API_KEY`.
+- `poster_mode: prompt`: Output the full poster prompt only. Use this only when the user chose prompt-only mode.
+- `enabled: false`: Do not produce posters; ask the user to enable poster output first.
+
+Do not silently fall back from image mode to prompt mode. If image mode is selected and `OPENAI_API_KEY` is missing, stop and ask the user to configure it.
+
+## Default Image Settings
+
+- Provider: `openai`
+- Model: `gpt-image-1.5`
+- Size: `1024x1536`
 - Ratio: `9:16`
-- Use case: 小红书 / 朋友圈 / 手机端资讯卡片
-- Style: Chinese tech-media infographic, clean hierarchy, editorial, high contrast, modern but not cyberpunk
-- Content: Top 3-5 scored AI news items
-- Language: Simplified Chinese
+- Quality: `medium`
+- Output directory: `memory/posters/`
+- Filename: `ai-hot-radar-YYYY-MM-DD-HHMM.png`
 
-## Content Structure
+## Poster Structure
 
 ```text
 标题：今日 AI 热点雷达
@@ -29,15 +39,15 @@ Top 5: ...
 ## Prompt Template
 
 ```text
-生成一张 9:16 竖版中文 AI 资讯海报，适合小红书和朋友圈发布。
+生成一张 9:16 竖版中文 AI 资讯海报，适合小红书、朋友圈和公众号封面二次裁切。
 
-视觉风格：中文科技媒体信息图，干净、高级、层次清晰，白色或浅灰背景，蓝绿色点缀，少量渐变块，卡片式信息层级，避免赛博霓虹、避免杂乱背景、避免夸张 3D 机器人。
+视觉风格：中文科技媒体信息图，干净、高级、层次清晰，白色或浅灰背景，蓝绿色点缀，少量渐变块，卡片式信息层级，深浅对比明确。避免赛博霓虹、避免杂乱背景、避免夸张 3D 机器人。
 
 版式要求：
 - 顶部大标题：今日 AI 热点雷达
 - 副标题：过去 24 小时最值得关注的 5 件事
-- 中部用 5 个信息卡片展示热点，每张卡片包含分数、中文短标题、7-12 字判断
-- 右上角可有小标签：AI NEWS / 24H
+- 右上角小标签：AI NEWS / 24H
+- 中部用 5 个信息卡片展示热点，每张卡片包含分数、中文短标题、短判断
 - 底部小字：数据源：AI HOT / 官方 RSS / GitHub
 - 中文字体清晰可读，信息密度适中，留白充足
 
@@ -52,41 +62,46 @@ Poster text must be shorter than briefing text:
 
 - Title: 8-18 Chinese characters when possible.
 - Judgment: 7-12 Chinese characters.
-- Do not include URLs on the poster.
-- Do not include source names per item unless the user asks.
+- Avoid full URLs on the poster.
+- Avoid per-item source names unless the user asks.
+- Keep model, product, and company names recognizable.
 
 Examples:
 
 ```text
 83｜Claude 接入 AWS｜企业采购提速
-78｜OpenAI 推 DeployCo｜落地服务加码
+78｜OpenAI 推企业服务｜落地服务加码
 76｜新开源模型发布｜开发者可试用
 ```
 
-## baoyu-imagine Handoff
+## Generation Command
 
-If `baoyu-imagine` is installed or available, hand off the final prompt to it.
+Write the final prompt to:
 
-Recommended settings:
+```bash
+$MEMORY_ROOT/posters/latest-prompt.txt
+```
+
+Then run:
+
+```bash
+python3 scripts/generate_openai_poster.py \
+  --prompt-file "$MEMORY_ROOT/posters/latest-prompt.txt" \
+  --output-dir "$MEMORY_ROOT/posters" \
+  --model "gpt-image-1.5" \
+  --size "1024x1536" \
+  --quality "medium"
+```
+
+When successful, return the generated PNG path to the user and display the image if the UI supports local images.
+
+## Missing API Key
+
+If `OPENAI_API_KEY` is missing in image mode, output:
 
 ```text
-provider: auto
-quality: 2k
-aspect ratio: 9:16
-output filename: ai-hot-radar-YYYY-MM-DD.png
+海报图片模式需要 OpenAI Images API。请在 Agent Secret 或运行环境里设置 OPENAI_API_KEY，然后重新运行。
+示例：export OPENAI_API_KEY="sk-..."
 ```
 
-Do not block the news briefing if image generation is unavailable. In that case, output the prompt and say it can be copied into `baoyu-imagine` or any text-to-image tool.
-
-## Fallback Output
-
-When no image-generation tool is available, output:
-
-```markdown
-## 海报生成 Prompt
-用途：小红书/朋友圈竖版资讯海报
-比例：9:16
-风格：中文科技媒体信息图，干净、高级、层次清晰
-
-<complete prompt>
-```
+Do not store API keys in Markdown memory files or committed files.

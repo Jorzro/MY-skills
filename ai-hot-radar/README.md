@@ -2,21 +2,17 @@
 
 AI Hot Radar 是一个面向 OpenClaw / Codex / Claude Code / Cursor 等 Agent 的 AI 资讯热点 skill。
 
-它会直接抓取公开 AI 资讯源，融合 `AI HOT`、精选 AI RSS 和 GitHub AI 趋势，对资讯做去重、聚合和 `0-100` 分重要度评分，再输出翻译、改写、排版后的中文编辑型简报，并通过 Markdown 文件把历史播报记录外化保存下来。
-
-这个版本不需要自建后端、不需要数据库、不需要 API Key。只要求 Agent 能联网，并能在自己的持久化空间里读写文件。
+它会抓取 `AI HOT`、精选 AI RSS 和 GitHub AI 趋势，对资讯做去重、聚合和 `0-100` 分重要度评分。首次使用会先做 5 题偏好问卷，之后按用户偏好输出中文文字资讯，或直接生成中文热点海报图片。
 
 ## 能做什么
 
 - 查询“今天 AI 圈有什么”“最近 24 小时最重磅 AI 新闻”“OpenAI 最近发了什么”。
-- 自动抓取 `AI HOT`、官方/高质量 AI RSS、GitHub AI 开源趋势。
-- 对同一事件做去重和合并，避免重复播报。
-- 给每条资讯打 `0-100` 分，并用中文说明一句话结论、为什么重要、适合谁关注。
-- 把英文官方源和媒体源翻译改写成自然中文，不把英文标题直接作为主标题。
-- 支持“今日 AI 热点海报 / 小红书封面 / 朋友圈图 / 公众号封面”模式，优先联动 `baoyu-imagine`，没有图像能力时输出完整文生图 prompt。
+- 首次使用先配置：输出方式、关注方向、受众视角、过滤偏好、海报配置。
+- 输出排版好的中文编辑型简报，不直接把英文标题当主标题。
+- 支持海报图片模式：默认用 OpenAI Images API 生成 PNG。
+- 支持 prompt-only 海报模式，但必须由用户选择。
 - 支持早报、晚报、重大快讯三类 OpenClaw 心跳。
-- 把历史记录写入 `ledger.md`，下次心跳时自动跳过已播报内容。
-- 允许用户通过 `interests.md` 写关注方向和负向过滤词。
+- 用 Markdown 记忆文件记录历史，避免重复播报。
 
 ## 目录结构
 
@@ -28,44 +24,24 @@ ai-hot-radar/
 ├── SKILL.md
 ├── agents/
 │   └── openai.yaml
-└── references/
-    ├── output-style.md
-    ├── poster-guide.md
-    ├── scoring-rubric.md
-    └── source-map.md
+├── references/
+│   ├── output-style.md
+│   ├── poster-guide.md
+│   ├── scoring-rubric.md
+│   └── source-map.md
+└── scripts/
+    └── generate_openai_poster.py
 ```
 
 ## 安装
 
-### 方式 A：让 Agent 自动装
-
-在你的 Agent 里直接发这句话：
+让 Agent 自动安装：
 
 ```text
 帮我安装这个 skill：https://github.com/Jorzro/MY-skills/tree/main/ai-hot-radar
 ```
 
-Agent 应该安装整个 `ai-hot-radar` 目录，不要只复制 `SKILL.md`。
-
-### 方式 B：原始入口文件
-
-如果 Agent 需要读取原始入口文件：
-
-```text
-https://raw.githubusercontent.com/Jorzro/MY-skills/refs/heads/main/ai-hot-radar/SKILL.md
-```
-
-如果当前网络访问 `raw.githubusercontent.com` 不稳定，可让 Agent 用 GitHub Contents API 读取同一个文件：
-
-```text
-https://api.github.com/repos/Jorzro/MY-skills/contents/ai-hot-radar/SKILL.md?ref=main
-```
-
-更完整的 Agent 安装和调用说明见 `AGENT_USAGE.md`。
-
-### 方式 C：一行命令手动装
-
-默认安装到 OpenClaw：
+一行命令安装到 OpenClaw 默认目录：
 
 ```bash
 curl -fsSL -H 'Accept: application/vnd.github.raw' \
@@ -80,234 +56,97 @@ SKILL_DIR=$HOME/.codex/skills/ai-hot-radar \
     'https://api.github.com/repos/Jorzro/MY-skills/contents/ai-hot-radar/install.sh?ref=main')
 ```
 
-常见位置示例：
+## 首次问卷
+
+首次使用时，如果还没有配置，Agent 会先问 5 题：
+
+1. 输出方式：文字资讯 / 海报图片 / 每次先问我。
+2. 关注方向：模型发布、AI Agent、开源项目、产品工具、行业融资/大厂动态、论文研究，可多选。
+3. 受众视角：创业者/投资人、开发者、产品/运营、研究者、企业采购/管理者。
+4. 不想看什么：普通教程、Prompt 技巧、炒冷饭资讯、低质量营销稿、暂时不过滤。
+5. 海报配置：启用 OpenAI Images API / 只生成海报 prompt / 暂不启用海报。
+
+你也可以随时说：
 
 ```text
-~/.openclaw/skills/ai-hot-radar/
-~/.codex/skills/ai-hot-radar/
-~/.claude/skills/ai-hot-radar/
+重新配置 AI 热点偏好
+切换成文字模式
+切换成海报模式
+每次都问我
 ```
 
-如果你的平台使用的是技能市场或上传式安装，把这个目录作为一个完整 skill 包上传即可。
+## 两种输出
 
-## 基础用法
-
-安装后可以直接这样问：
+文字资讯：
 
 ```text
-今天 AI 圈有什么？
+文字版：今天 AI 圈有什么？
 ```
 
-```text
-最近 24 小时最重磅 AI 新闻，按重要程度打分。
-```
+输出中文简报，包含分数、中文标题、一句话结论、为什么重要、适合谁关注、来源链接。
 
-```text
-OpenAI 最近发了什么？
-```
+海报图片：
 
 ```text
 把今天 AI 热点做成一张小红书海报。
 ```
 
-```text
-最近一周 AI 论文里哪些值得看？
-```
+默认用 OpenAI Images API 生成 PNG，图片保存在：
 
 ```text
-查看最近已播报记录。
+memory/posters/
 ```
 
-## OpenClaw 心跳用法
+海报图片模式需要配置：
 
-推荐配置三类心跳。
-
-早报：
-
-```text
-使用 ai-hot-radar 执行早报心跳。
+```bash
+export OPENAI_API_KEY="sk-..."
 ```
 
-晚报：
-
-```text
-使用 ai-hot-radar 执行晚报心跳。
-```
-
-重大快讯：
-
-```text
-使用 ai-hot-radar 执行重大快讯心跳，只在有 90 分以上新增事件时输出。
-```
-
-默认策略：
-
-- `08:30` 早报：过去 12 小时，输出新增重点资讯。
-- `20:30` 晚报：过去 24 小时，输出完整总结。
-- 每 2 小时重大快讯：只播报 `90` 分以上且未播报过的新增事件。
+不要把 API Key 写进 `preferences.md`、`interests.md` 或仓库文件。
 
 ## 记忆文件
 
-skill 默认使用这个目录保存状态：
+默认记忆目录：
 
 ```bash
 $HOME/.openclaw/skills/ai-hot-radar/memory
 ```
 
-可通过环境变量覆盖：
+可用环境变量覆盖：
 
 ```bash
 AI_HOT_RADAR_MEMORY_ROOT=/path/to/persistent/memory
 ```
 
-首次运行时会创建：
+首次运行会创建：
 
 ```text
 memory/
 ├── ledger.md
 ├── interests.md
 ├── preferences.md
-└── briefings/
+├── briefings/
+└── posters/
 ```
 
-`ledger.md` 是长期账本，记录每个事件的指纹、标题、首次发现时间、最近发现时间、分数、分类、来源、播报时间和状态。
+## OpenClaw 心跳
 
-`briefings/` 保存每次早报、晚报和重大快讯内容。
+推荐配置：
 
-`interests.md` 用来写你的关注方向和负向过滤词，例如：
-
-```markdown
-# AI Hot Radar Interests
-
-## Focus
-- AI agents
-- frontier models
-- developer tools
-- open source AI projects
-
-## Negative Filters
-- generic prompt tips
-- old tutorials without new release information
+```text
+使用 ai-hot-radar 执行早报心跳。
+使用 ai-hot-radar 执行晚报心跳。
+使用 ai-hot-radar 执行重大快讯心跳，只在有 90 分以上新增事件时输出。
 ```
 
-`preferences.md` 用来保存输出和海报偏好，默认：
+心跳默认走文字模式，除非你在 `preferences.md` 里明确设置 `heartbeat_output_mode: poster`。
 
-```markdown
-# AI Hot Radar Preferences
+## 数据源与评分
 
-## Output
-language: zh-CN
-style: editorial
-show_original_title: false
+主数据源是 `AI HOT`，补充源包括官方/高质量 AI RSS 和 GitHub AI 趋势。详细源表见 `references/source-map.md`。
 
-## Poster
-enabled: true
-default_ratio: 9:16
-default_style: editorial-tech
-image_skill: baoyu-imagine
-fallback: prompt
-```
-
-## 数据源
-
-主数据源：
-
-- `AI HOT`: `https://aihot.virxact.com`
-
-补充 RSS：
-
-- OpenAI News
-- Google DeepMind Blog
-- Google AI
-- The Decoder
-- Latent Space
-- MarkTechPost
-- Anthropic / Hugging Face / Mistral / Meta AI 等尝试源
-
-补充开源趋势：
-
-- GitHub Search API
-
-详细数据源定义见 `references/source-map.md`。
-
-## 评分规则
-
-每条资讯最终得到 `0-100` 分。
-
-规则底座共 `80` 分：
-
-- 来源权威性：`0-15`
-- 事件级别：`0-20`
-- 与 AI 核心相关度：`0-15`
-- 影响范围：`0-10`
-- 时效性：`0-10`
-- 多源印证/是否被精选：`0-10`
-
-Agent 语义校正共 `20` 分：
-
-- 是否改变行业预期
-- 是否是正式发布而非传闻
-- 是否值得创业者/开发者立即关注
-- 是否有明确行动价值
-
-分数解释：
-
-- `90-100`: 爆炸级，适合重大快讯。
-- `75-89`: 重磅，优先进入早晚报头部。
-- `60-74`: 重点，进入正常简报。
-- `40-59`: 一般，只在完整列表里展示。
-- `<40`: 默认忽略。
-
-详细评分表见 `references/scoring-rubric.md`。
-
-## 中文简报与海报
-
-默认输出是中文编辑稿，不是原始数据列表。每条重点资讯包含：
-
-- `分数`
-- `中文标题`
-- `一句话结论`
-- `为什么重要`
-- `适合谁关注`
-- `来源链接`
-
-当用户要求“生成海报 / 做成图 / 小红书封面 / 朋友圈图 / 公众号封面”时，skill 会先生成中文简报，再基于 Top 3-5 条热点生成海报内容。若 Agent 已安装 `baoyu-imagine` 或有其他文生图工具，可直接生成图片；否则输出完整中文文生图 prompt。
-
-## 去重逻辑
-
-skill 会把不同来源中的同一事件合并成一条。
-
-合并依据包括：
-
-- 规范化标题
-- 链接域名和路径
-- 公司名、模型名、产品名
-- 发布时间窗口
-
-同一事件的主条目优先级：
-
-1. `AI HOT selected`
-2. 官方一手来源
-3. 高质量 AI 媒体或 newsletter
-4. GitHub 趋势
-5. 社交平台转述
-
-## 容错
-
-- `AI HOT` 返回 403 时，skill 会用浏览器 `User-Agent` 重试。
-- 单个 RSS 源失败时直接跳过。
-- GitHub API 被限流时跳过开源趋势部分。
-- 如果重大快讯心跳没有新内容，不输出打扰消息，只更新账本。
-
-## 适用范围
-
-完整使用需要 Agent 支持：
-
-- 读取标准 `SKILL.md`
-- 联网请求公开 URL
-- 持久化读写 Markdown 文件
-
-如果某个 Agent 只能读取提示词，不能联网或不能写文件，也可以参考 `SKILL.md` 里的流程，但无法完整实现心跳去重和历史记忆。
+每条资讯最终得到 `0-100` 分。详细评分表见 `references/scoring-rubric.md`。
 
 ## License
 

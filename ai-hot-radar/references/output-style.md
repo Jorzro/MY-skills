@@ -1,6 +1,6 @@
 # AI Hot Radar Output Style
 
-Use this file whenever producing a user-facing briefing, company report, daily report, weekly report, or heartbeat output.
+Use this file whenever producing a user-facing briefing, company report, daily report, weekly report, heartbeat output, or poster copy.
 
 ## Default Voice
 
@@ -27,6 +27,14 @@ Every top item should have this shape:
 适合谁关注：<创业者/开发者/产品团队/研究者/投资人/企业采购/普通用户>
 来源：<source name + URL>
 ```
+
+## Output Modes
+
+When the user selected text mode, produce the full editorial card format above.
+
+When the user selected poster mode, first prepare editorial cards internally, then compress them for image use. The poster should not contain long explanations, URLs, or raw English titles.
+
+If the saved preference is `output_mode: ask`, ask the user to choose `文字资讯` or `海报图片` before fetching unless the request wording already makes the mode obvious.
 
 ## Headline Guidelines
 
@@ -68,6 +76,18 @@ Use these Chinese category labels:
 - Full list: include 40-59 scores only when the user asks for `全部`, `完整`, `所有`, or `全量`.
 - Company/topic report: top 5, then timeline if useful.
 - Heartbeat alert: one event only unless multiple events are independently `90+`.
+- Poster: top 3-5 items, each compressed to one short Chinese title plus one 7-12 character judgment.
+
+## Poster Copy Rules
+
+Poster copy is not a miniature article.
+
+- Main title: `今日 AI 热点雷达` unless the user requests another title.
+- Subtitle: state the time window, e.g. `过去 24 小时最值得关注的 5 件事`.
+- Item title: 8-18 Chinese characters when possible.
+- Item judgment: 7-12 Chinese characters, e.g. `企业采购提速`, `开发者可试用`, `监管风险升温`.
+- Use scores, but do not include long scoring explanations on the image.
+- Keep source footer short: `数据源：AI HOT / 官方 RSS / GitHub`.
 
 ## Source Presentation
 
