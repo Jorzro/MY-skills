@@ -2,7 +2,7 @@
 
 AI Hot Radar 是一个面向 OpenClaw / Codex / Claude Code / Cursor 等 Agent 的 AI 资讯热点 skill。
 
-它会直接抓取公开 AI 资讯源，融合 `AI HOT`、精选 AI RSS 和 GitHub AI 趋势，对资讯做去重、聚合和 `0-100` 分重要度评分，并通过 Markdown 文件把历史播报记录外化保存下来。
+它会直接抓取公开 AI 资讯源，融合 `AI HOT`、精选 AI RSS 和 GitHub AI 趋势，对资讯做去重、聚合和 `0-100` 分重要度评分，再输出翻译、改写、排版后的中文编辑型简报，并通过 Markdown 文件把历史播报记录外化保存下来。
 
 这个版本不需要自建后端、不需要数据库、不需要 API Key。只要求 Agent 能联网，并能在自己的持久化空间里读写文件。
 
@@ -11,7 +11,9 @@ AI Hot Radar 是一个面向 OpenClaw / Codex / Claude Code / Cursor 等 Agent �
 - 查询“今天 AI 圈有什么”“最近 24 小时最重磅 AI 新闻”“OpenAI 最近发了什么”。
 - 自动抓取 `AI HOT`、官方/高质量 AI RSS、GitHub AI 开源趋势。
 - 对同一事件做去重和合并，避免重复播报。
-- 给每条资讯打 `0-100` 分，并说明为什么重要。
+- 给每条资讯打 `0-100` 分，并用中文说明一句话结论、为什么重要、适合谁关注。
+- 把英文官方源和媒体源翻译改写成自然中文，不把英文标题直接作为主标题。
+- 支持“今日 AI 热点海报 / 小红书封面 / 朋友圈图 / 公众号封面”模式，优先联动 `baoyu-imagine`，没有图像能力时输出完整文生图 prompt。
 - 支持早报、晚报、重大快讯三类 OpenClaw 心跳。
 - 把历史记录写入 `ledger.md`，下次心跳时自动跳过已播报内容。
 - 允许用户通过 `interests.md` 写关注方向和负向过滤词。
@@ -27,6 +29,8 @@ ai-hot-radar/
 ├── agents/
 │   └── openai.yaml
 └── references/
+    ├── output-style.md
+    ├── poster-guide.md
     ├── scoring-rubric.md
     └── source-map.md
 ```
@@ -103,6 +107,10 @@ OpenAI 最近发了什么？
 ```
 
 ```text
+把今天 AI 热点做成一张小红书海报。
+```
+
+```text
 最近一周 AI 论文里哪些值得看？
 ```
 
@@ -158,6 +166,7 @@ AI_HOT_RADAR_MEMORY_ROOT=/path/to/persistent/memory
 memory/
 ├── ledger.md
 ├── interests.md
+├── preferences.md
 └── briefings/
 ```
 
@@ -179,6 +188,24 @@ memory/
 ## Negative Filters
 - generic prompt tips
 - old tutorials without new release information
+```
+
+`preferences.md` 用来保存输出和海报偏好，默认：
+
+```markdown
+# AI Hot Radar Preferences
+
+## Output
+language: zh-CN
+style: editorial
+show_original_title: false
+
+## Poster
+enabled: true
+default_ratio: 9:16
+default_style: editorial-tech
+image_skill: baoyu-imagine
+fallback: prompt
 ```
 
 ## 数据源
@@ -232,6 +259,19 @@ Agent 语义校正共 `20` 分：
 - `<40`: 默认忽略。
 
 详细评分表见 `references/scoring-rubric.md`。
+
+## 中文简报与海报
+
+默认输出是中文编辑稿，不是原始数据列表。每条重点资讯包含：
+
+- `分数`
+- `中文标题`
+- `一句话结论`
+- `为什么重要`
+- `适合谁关注`
+- `来源链接`
+
+当用户要求“生成海报 / 做成图 / 小红书封面 / 朋友圈图 / 公众号封面”时，skill 会先生成中文简报，再基于 Top 3-5 条热点生成海报内容。若 Agent 已安装 `baoyu-imagine` 或有其他文生图工具，可直接生成图片；否则输出完整中文文生图 prompt。
 
 ## 去重逻辑
 

@@ -1,8 +1,8 @@
 # AI Hot Radar — Agent Skill 使用手册
 
-让 Agent 用自然中文查询最新 AI 资讯，并自动完成抓取、去重、聚合、`0-100` 分重要度评分、早晚报和重大快讯记忆。
+让 Agent 用自然中文查询最新 AI 资讯，并自动完成抓取、去重、聚合、`0-100` 分重要度评分、中文编辑型简报、早晚报、重大快讯记忆和热点海报 prompt。
 
-本 skill 融合 `AI HOT`、精选 AI RSS 和 GitHub AI 趋势，不需要自建后端，不需要数据库，不需要 API Key。
+本 skill 融合 `AI HOT`、精选 AI RSS 和 GitHub AI 趋势，不需要自建后端，不需要数据库，不需要 API Key。海报生成是增强能力：有 `baoyu-imagine` 或其他文生图工具时直接联动，没有时输出可复制 prompt。
 
 > 适用于 OpenClaw / Codex / Claude Code / Cursor / Gemini CLI / OpenCode / Cline / Windsurf 等支持 `SKILL.md` 的 Agent 平台。
 
@@ -37,6 +37,8 @@ https://api.github.com/repos/Jorzro/MY-skills/contents/ai-hot-radar/SKILL.md?ref
 ```text
 references/scoring-rubric.md
 references/source-map.md
+references/output-style.md
+references/poster-guide.md
 agents/openai.yaml
 ```
 
@@ -83,6 +85,7 @@ SKILL_DIR=$HOME/.claude/skills/ai-hot-radar \
 | 最近 AI 开源项目、GitHub AI 趋势 | 加入 GitHub AI 趋势层 |
 | 只看模型发布 / 产品发布 / 行业动态 / 论文 / 开源项目 | 按分类过滤 |
 | 给今天热点按重要度打分 | 每条输出 `0-100` 分和理由 |
+| 生成海报、做成图、小红书封面、朋友圈图、公众号封面 | 生成中文热点海报，优先联动 `baoyu-imagine` |
 | 查看最近已播报记录 | 读取 `ledger.md` 汇总 |
 | 早报 / 晚报 / 重大快讯心跳 | 走心跳流程并更新记忆 |
 
@@ -98,6 +101,7 @@ SKILL_DIR=$HOME/.claude/skills/ai-hot-radar \
 - 用户说公司、模型、产品名：走 `q=<关键词>`，再用 RSS 补洞。
 - 用户说“开源 / GitHub / 项目趋势”：加入 GitHub AI 趋势。
 - 用户说“只看我关心的方向”：读取 `interests.md` 做过滤和加权。
+- 用户说“海报 / 做成图 / 小红书 / 朋友圈 / 公众号封面”：先生成中文编辑稿，再走海报模式。
 
 ## 数据源
 
@@ -137,6 +141,8 @@ curl -sH "User-Agent: $UA" "https://aihot.virxact.com/api/public/items?mode=sele
 ```
 
 然后拉取 RSS 补充源，归一化、去重、评分，输出最高分 3-5 条。
+
+输出前必须做中文编辑：英文标题和摘要不能直接当主标题展示，要翻译并改写成自然中文标题。完整规范见 `references/output-style.md`。
 
 ### 日报：用户明确说“日报”
 
@@ -227,6 +233,52 @@ Agent 语义校正 `20` 分：
 
 分类时要避免关键词误判：安全事故、诉讼、监管、政策、融资、合作和企业采用归到“行业动态”，即使标题里出现 ChatGPT、Claude、Gemini 等模型名；只有真正的模型发布、模型更新、能力变化或模型可用性事件才归到“模型发布/更新”。
 
+## 中文简报格式
+
+默认输出：
+
+```markdown
+时间窗：<开始时间> - <结束时间>
+
+# 今日 AI 热点雷达
+
+## 今日判断
+<用一段中文总结今天 AI 圈主要趋势>
+
+## 最值得看
+1. **<分数>/100｜<中文标题>**
+   一句话：<一句中文结论>
+   为什么重要：<影响判断>
+   适合谁关注：<创业者/开发者/产品团队/研究者/投资人>
+   来源：<链接>
+```
+
+每条资讯必须用中文标题和中文判断。除非用户明确要求，不要把英文原始标题放在主展示位。
+
+## 海报模式
+
+触发词：
+
+```text
+生成海报
+做成图
+小红书封面
+朋友圈图
+公众号封面
+今日 AI 热点海报
+把前三条做成一张图
+```
+
+流程：
+
+1. 先生成中文编辑型简报。
+2. 选 Top 3-5 条做海报内容。
+3. 读取 `preferences.md`，默认比例 `9:16`，风格 `editorial-tech`，图像 skill `baoyu-imagine`。
+4. 如果当前 Agent 已安装 `baoyu-imagine` 或有文生图工具，直接把 prompt 交给图像工具。
+5. 如果没有图像能力，输出完整中文海报 prompt，用户可以复制到任意生图工具。
+
+详细海报 prompt 模板见 `references/poster-guide.md`。
+
 ## 记忆与心跳
 
 默认记忆目录：
@@ -241,6 +293,7 @@ $HOME/.openclaw/skills/ai-hot-radar/memory
 memory/
 ├── ledger.md
 ├── interests.md
+├── preferences.md
 └── briefings/
 ```
 

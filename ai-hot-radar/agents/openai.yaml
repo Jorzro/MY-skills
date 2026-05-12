@@ -1,8 +1,8 @@
 interface:
   display_name: "AI Hot Radar"
-  short_description: "AI资讯热点抓取、评分、去重和心跳简报"
+  short_description: "AI资讯中文简报、评分、去重、心跳和海报"
   brand_color: "#0F766E"
-  default_prompt: "Use $ai-hot-radar to summarize today's most important AI news with 0-100 importance scores."
+  default_prompt: "Use $ai-hot-radar to summarize today's most important AI news as a polished Chinese briefing with 0-100 scores."
 
 policy:
   allow_implicit_invocation: true
