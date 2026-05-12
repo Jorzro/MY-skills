@@ -9,7 +9,7 @@ AI Hot Radar 是一个面向 OpenClaw / Codex / Claude Code / Cursor 等 Agent �
 - 查询“今天 AI 圈有什么”“最近 24 小时最重磅 AI 新闻”“OpenAI 最近发了什么”。
 - 首次使用先配置：输出方式、关注方向、受众视角、过滤偏好、海报配置。
 - 输出排版好的中文编辑型简报，不直接把英文标题当主标题。
-- 支持海报图片模式：默认用 OpenAI Images API 生成 PNG。
+- 支持海报图片模式：可用 OpenAI、MiniMax、火山引擎方舟、OpenRouter 或自定义兼容接口生成 PNG。
 - 支持 prompt-only 海报模式，但必须由用户选择。
 - 支持早报、晚报、重大快讯三类 OpenClaw 心跳。
 - 用 Markdown 记忆文件记录历史，避免重复播报。
@@ -64,7 +64,7 @@ SKILL_DIR=$HOME/.codex/skills/ai-hot-radar \
 2. 关注方向：模型发布、AI Agent、开源项目、产品工具、行业融资/大厂动态、论文研究，可多选。
 3. 受众视角：创业者/投资人、开发者、产品/运营、研究者、企业采购/管理者。
 4. 不想看什么：普通教程、Prompt 技巧、炒冷饭资讯、低质量营销稿、暂时不过滤。
-5. 海报配置：启用 OpenAI Images API / 只生成海报 prompt / 暂不启用海报。
+5. 海报配置：OpenAI Images / MiniMax / 火山引擎方舟 / OpenRouter / 只生成海报 prompt / 暂不启用海报。
 
 你也可以随时说：
 
@@ -91,16 +91,20 @@ SKILL_DIR=$HOME/.codex/skills/ai-hot-radar \
 把今天 AI 热点做成一张小红书海报。
 ```
 
-默认用 OpenAI Images API 生成 PNG，图片保存在：
+默认用 OpenAI Images API，也可以在首次问卷或 `preferences.md` 里切换到 MiniMax、火山引擎方舟、OpenRouter 或自定义兼容接口。图片保存在：
 
 ```text
 memory/posters/
 ```
 
-海报图片模式需要配置：
+海报图片模式需要配置对应 Provider 的 API Key：
 
 ```bash
 export OPENAI_API_KEY="sk-..."
+export MINIMAX_API_KEY="..."
+export ARK_API_KEY="..."
+export VOLCENGINE_API_KEY="..."
+export OPENROUTER_API_KEY="..."
 ```
 
 不要把 API Key 写进 `preferences.md`、`interests.md` 或仓库文件。

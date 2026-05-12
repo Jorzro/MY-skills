@@ -4,16 +4,16 @@ Use this file when the user selects poster output or asks for a poster, image, c
 
 ## Output Modes
 
-- `poster_mode: image`: Generate an actual PNG with OpenAI Images API. This requires `OPENAI_API_KEY`.
+- `poster_mode: image`: Generate an actual PNG with the selected provider. This requires the provider API key env var.
 - `poster_mode: prompt`: Output the full poster prompt only. Use this only when the user chose prompt-only mode.
 - `enabled: false`: Do not produce posters; ask the user to enable poster output first.
 
-Do not silently fall back from image mode to prompt mode. If image mode is selected and `OPENAI_API_KEY` is missing, stop and ask the user to configure it.
+Do not silently fall back from image mode to prompt mode. If image mode is selected and the provider key is missing, stop and ask the user to configure it.
 
 ## Default Image Settings
 
 - Provider: `openai`
-- Model: `gpt-image-1.5`
+- Model: provider default
 - Size: `1024x1536`
 - Ratio: `9:16`
 - Quality: `medium`
@@ -88,20 +88,53 @@ Then run:
 python3 scripts/generate_openai_poster.py \
   --prompt-file "$MEMORY_ROOT/posters/latest-prompt.txt" \
   --output-dir "$MEMORY_ROOT/posters" \
+  --provider "openai" \
   --model "gpt-image-1.5" \
   --size "1024x1536" \
+  --aspect-ratio "9:16" \
   --quality "medium"
 ```
 
 When successful, return the generated PNG path to the user and display the image if the UI supports local images.
 
+## Providers
+
+| Provider | Key env | Default model | Notes |
+|---|---|---|---|
+| `openai` | `OPENAI_API_KEY` | `gpt-image-1.5` | Uses OpenAI Images API. |
+| `minimax` | `MINIMAX_API_KEY` | `image-01` | Uses MiniMax image generation; ratio is controlled by `--aspect-ratio`. |
+| `volcengine` | `ARK_API_KEY` or `VOLCENGINE_API_KEY` | `doubao-seedream-4-5-251128` | Uses Volcengine Ark image generation; users may need to replace the model with their enabled Seedream model. |
+| `openrouter` | `OPENROUTER_API_KEY` | `google/gemini-3.1-flash-image-preview` | Uses OpenRouter chat completions with image output; users may choose any image-output model they have access to. |
+| `custom` | `AI_HOT_RADAR_IMAGE_API_KEY` | user-defined | Requires `--api-url` or `AI_HOT_RADAR_IMAGE_API_URL`; expects OpenAI-compatible image generation output. |
+
+Provider examples:
+
+```bash
+# MiniMax
+python3 scripts/generate_openai_poster.py --provider minimax \
+  --prompt-file "$MEMORY_ROOT/posters/latest-prompt.txt" \
+  --output-dir "$MEMORY_ROOT/posters"
+
+# Volcengine Ark
+python3 scripts/generate_openai_poster.py --provider volcengine \
+  --prompt-file "$MEMORY_ROOT/posters/latest-prompt.txt" \
+  --output-dir "$MEMORY_ROOT/posters" \
+  --model "doubao-seedream-4-5-251128"
+
+# OpenRouter
+python3 scripts/generate_openai_poster.py --provider openrouter \
+  --prompt-file "$MEMORY_ROOT/posters/latest-prompt.txt" \
+  --output-dir "$MEMORY_ROOT/posters" \
+  --model "google/gemini-3.1-flash-image-preview"
+```
+
 ## Missing API Key
 
-If `OPENAI_API_KEY` is missing in image mode, output:
+If the selected provider key is missing in image mode, output:
 
 ```text
-海报图片模式需要 OpenAI Images API。请在 Agent Secret 或运行环境里设置 OPENAI_API_KEY，然后重新运行。
-示例：export OPENAI_API_KEY="sk-..."
+海报图片模式需要 <provider> API Key。请在 Agent Secret 或运行环境里设置 <api_key_env>，然后重新运行。
+示例：export <api_key_env>="..."
 ```
 
 Do not store API keys in Markdown memory files or committed files.

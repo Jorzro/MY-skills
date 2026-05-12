@@ -40,7 +40,7 @@ SKILL_DIR=$HOME/.codex/skills/ai-hot-radar \
 2. 关注方向，可多选：A 模型发布/能力更新 / B AI Agent/自动化 / C 开源项目/GitHub 趋势 / D 产品发布/工具 / E 行业融资/大厂动态 / F 论文研究
 3. 受众视角，可多选：A 创业者/投资人 / B 开发者 / C 产品/运营 / D 研究者 / E 企业采购/管理者
 4. 不想看什么，可多选：A 普通教程 / B Prompt 技巧 / C 炒冷饭资讯 / D 低质量营销稿 / E 暂时不过滤
-5. 海报配置：A 启用 OpenAI Images API 直接出图 / B 只生成海报 prompt / C 暂不启用海报
+5. 海报配置：A OpenAI Images / B MiniMax / C 火山引擎方舟 / D OpenRouter / E 只生成海报 prompt / F 暂不启用海报
 ```
 
 用户说“按默认”时写入：
@@ -49,7 +49,7 @@ SKILL_DIR=$HOME/.codex/skills/ai-hot-radar \
 - 关注方向：模型发布、AI Agent、开源项目、产品工具
 - 受众视角：创业者/投资人、开发者
 - 过滤：普通教程、Prompt 技巧、炒冷饭资讯
-- 海报：启用 OpenAI Images API
+- 海报：启用 OpenAI Images API；也可选 MiniMax、火山引擎方舟、OpenRouter
 
 ## 偏好文件
 
@@ -73,8 +73,10 @@ poster_mode: image
 poster_provider: openai
 image_model: gpt-image-1.5
 image_size: 1024x1536
+image_aspect_ratio: 9:16
 image_quality: medium
 api_key_env: OPENAI_API_KEY
+api_url:
 prompt_fallback: false
 
 ## Heartbeat
@@ -185,25 +187,37 @@ curl -sH "User-Agent: $UA" "https://aihot.virxact.com/api/public/items?mode=sele
 2. 选 Top 3-5 条。
 3. 按 `references/poster-guide.md` 压缩成海报 prompt。
 4. 如果 `poster_mode: prompt`，只输出 prompt。
-5. 如果 `poster_mode: image`，检查 `OPENAI_API_KEY`。
+5. 如果 `poster_mode: image`，检查当前 Provider 对应的 API Key 环境变量。
 6. 有 key 时运行：
 
 ```bash
 python3 scripts/generate_openai_poster.py \
   --prompt-file "$MEMORY_ROOT/posters/latest-prompt.txt" \
   --output-dir "$MEMORY_ROOT/posters" \
+  --provider "openai" \
   --model "gpt-image-1.5" \
   --size "1024x1536" \
+  --aspect-ratio "9:16" \
   --quality "medium"
 ```
 
 7. 返回生成的 PNG 路径，并在支持图片展示的 Agent UI 中展示图片。
 
+支持的 Provider：
+
+| Provider | Key 环境变量 | 默认模型 |
+|---|---|---|
+| OpenAI | `OPENAI_API_KEY` | `gpt-image-1.5` |
+| MiniMax | `MINIMAX_API_KEY` | `image-01` |
+| 火山引擎方舟 | `ARK_API_KEY` 或 `VOLCENGINE_API_KEY` | `doubao-seedream-4-5-251128` |
+| OpenRouter | `OPENROUTER_API_KEY` | `google/gemini-3.1-flash-image-preview` |
+| 自定义兼容接口 | `AI_HOT_RADAR_IMAGE_API_KEY` | 用户自定义 |
+
 如果缺少 key，输出：
 
 ```text
-海报图片模式需要 OpenAI Images API。请在 Agent Secret 或运行环境里设置 OPENAI_API_KEY，然后重新运行。
-示例：export OPENAI_API_KEY="sk-..."
+海报图片模式需要 <provider> API Key。请在 Agent Secret 或运行环境里设置 <api_key_env>，然后重新运行。
+示例：export <api_key_env>="..."
 ```
 
 不要把 API Key 写进 Markdown 记忆文件或仓库。

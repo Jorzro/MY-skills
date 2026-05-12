@@ -2,7 +2,7 @@
 name: ai-hot-radar
 description: Use when the user asks for current AI news, AI daily briefings, AI hot topics, OpenAI/Anthropic/Google updates, AI papers, GitHub AI trends, Chinese AI news summaries, AI news scoring, or AI news posters/小红书封面/朋友圈图/公众号封面.
 metadata:
-  version: 1.2.0
+  version: 1.3.0
   category: news
   description_zh: 融合 AI HOT、精选 AI RSS 与 GitHub AI 趋势，首次使用先完成偏好问卷，之后按文字资讯或海报图片两种模式输出中文 AI 热点简报。
 ---
@@ -12,7 +12,7 @@ metadata:
 ## Goal
 Use public sources to answer current AI news questions as polished Chinese editorial briefings or generated poster images, with onboarding preferences, deduplication, 0-100 importance scoring, and persistent Markdown memory.
 
-No custom backend or database is required. Markdown files under the memory directory are the long-term state. Poster image mode uses OpenAI Images API through `scripts/generate_openai_poster.py` and reads the API key only from `OPENAI_API_KEY`.
+No custom backend or database is required. Markdown files under the memory directory are the long-term state. Poster image mode uses `scripts/generate_openai_poster.py` and can call OpenAI, MiniMax, Volcengine Ark, OpenRouter, or a custom OpenAI-compatible endpoint. API keys must come from environment variables or Agent Secrets.
 
 ## Completion Standard
 Before replying or finishing a heartbeat, verify:
@@ -21,7 +21,7 @@ Before replying or finishing a heartbeat, verify:
 - Items were normalized, deduplicated, scored from 0-100, and sorted by score first, recency second.
 - English titles and summaries were translated and rewritten into natural Chinese before display.
 - Text mode top items include score, Chinese headline, one-sentence takeaway, importance reason, audience, and source links.
-- Poster mode either generated an actual image file, or stopped with a clear `OPENAI_API_KEY` configuration instruction. Do not silently replace image mode with prompt-only output unless the user chose prompt-only mode.
+- Poster mode either generated an actual image file, or stopped with a clear provider API key configuration instruction. Do not silently replace image mode with prompt-only output unless the user chose prompt-only mode.
 - Previously briefed items in `ledger.md` were not repeated unless the user explicitly asks for history.
 - Heartbeat runs updated `ledger.md` and the matching `briefings/*.md` file when a briefing is produced.
 
@@ -86,8 +86,10 @@ poster_mode: image
 poster_provider: openai
 image_model: gpt-image-1.5
 image_size: 1024x1536
+image_aspect_ratio: 9:16
 image_quality: medium
 api_key_env: OPENAI_API_KEY
+api_url:
 prompt_fallback: false
 
 ## Heartbeat
@@ -107,7 +109,7 @@ Use concise Chinese multiple-choice wording:
 2. 关注方向，可多选：A 模型发布/能力更新 / B AI Agent/自动化 / C 开源项目/GitHub 趋势 / D 产品发布/工具 / E 行业融资/大厂动态 / F 论文研究
 3. 受众视角，可多选：A 创业者/投资人 / B 开发者 / C 产品/运营 / D 研究者 / E 企业采购/管理者
 4. 不想看什么，可多选：A 普通教程 / B Prompt 技巧 / C 炒冷饭资讯 / D 低质量营销稿 / E 暂时不过滤
-5. 海报配置：A 启用 OpenAI Images API 直接出图 / B 只生成海报 prompt / C 暂不启用海报
+5. 海报配置：A OpenAI Images / B MiniMax / C 火山引擎方舟 / D OpenRouter / E 只生成海报 prompt / F 暂不启用海报
 ```
 
 Default choices when the user says "按默认":
@@ -121,6 +123,7 @@ Mode update commands:
 - "重新配置 AI 热点偏好": run the questionnaire again and overwrite preferences/interests.
 - "切换成文字模式": set `output_mode: text`, `ask_each_time: false`.
 - "切换成海报模式": set `output_mode: poster`, `ask_each_time: false`, keep poster API settings.
+- "切换海报 API 为 MiniMax/OpenAI/火山/OpenRouter": update `poster_provider`, `api_key_env`, and default model according to the Provider table.
 - "每次都问我": set `output_mode: ask`, `ask_each_time: true`.
 
 ## Mode Selection
@@ -265,25 +268,37 @@ Workflow:
 4. Compress each item for image text: short Chinese title plus 7-12 character judgment.
 5. Build a complete Chinese poster prompt with title, time window, Top 5, scores, and source footer.
 6. If `poster_mode: prompt`, output the prompt only.
-7. If `poster_mode: image`, require `OPENAI_API_KEY`. If it is missing, stop and tell the user to configure it.
+7. If `poster_mode: image`, require the selected provider's API key env var. If it is missing, stop and tell the user to configure it.
 8. Run:
 
 ```bash
 python3 scripts/generate_openai_poster.py \
   --prompt-file "$MEMORY_ROOT/posters/latest-prompt.txt" \
   --output-dir "$MEMORY_ROOT/posters" \
+  --provider "openai" \
   --model "gpt-image-1.5" \
   --size "1024x1536" \
+  --aspect-ratio "9:16" \
   --quality "medium"
 ```
 
 9. Return the generated PNG path and, if the agent UI supports it, display the image.
 
+Provider table:
+
+| Provider | `poster_provider` | Default key env | Default model | Endpoint |
+|---|---|---|---|---|
+| OpenAI | `openai` | `OPENAI_API_KEY` | `gpt-image-1.5` | `https://api.openai.com/v1/images/generations` |
+| MiniMax | `minimax` | `MINIMAX_API_KEY` | `image-01` | `https://api.minimax.io/v1/image_generation` |
+| 火山引擎方舟 | `volcengine` | `ARK_API_KEY` or `VOLCENGINE_API_KEY` | `doubao-seedream-4-5-251128` | `https://ark.cn-beijing.volces.com/api/v3/images/generations` |
+| OpenRouter | `openrouter` | `OPENROUTER_API_KEY` | `google/gemini-3.1-flash-image-preview` | `https://openrouter.ai/api/v1/chat/completions` |
+| 自定义兼容接口 | `custom` | `AI_HOT_RADAR_IMAGE_API_KEY` | user-defined | set `api_url` or `AI_HOT_RADAR_IMAGE_API_URL` |
+
 API key instruction when missing:
 
 ```text
-海报图片模式需要 OpenAI Images API。请在 Agent Secret 或运行环境里设置 OPENAI_API_KEY，然后重新运行。
-示例：export OPENAI_API_KEY="sk-..."
+海报图片模式需要 <provider> API Key。请在 Agent Secret 或运行环境里设置 <api_key_env>，然后重新运行。
+示例：export <api_key_env>="..."
 ```
 
 Do not write API keys into `preferences.md`, `interests.md`, `ledger.md`, or any committed file.
@@ -315,8 +330,8 @@ Status values: `seen`, `briefed`, `alerted`, `suppressed`.
 - RSS feed unavailable: skip it.
 - GitHub rate limited: skip GitHub trends.
 - No new heartbeat items: avoid user-visible output for alert checks.
-- Poster API key missing: stop with setup instructions, do not downgrade to prompt unless user chose prompt-only mode.
-- Poster API error: show the error summary and suggest checking `OPENAI_API_KEY`, organization verification, model access, and billing.
+- Poster API key missing: stop with provider-specific setup instructions, do not downgrade to prompt unless user chose prompt-only mode.
+- Poster API error: show the error summary and suggest checking provider key, model name, endpoint, account access, and billing.
 
 ## Install Notes For OpenClaw
 Install the folder as a normal OpenClaw skill. The skill is self-contained:
@@ -325,7 +340,7 @@ Install the folder as a normal OpenClaw skill. The skill is self-contained:
 - `references/source-map.md` defines source coverage.
 - `references/output-style.md` defines Chinese editorial output.
 - `references/poster-guide.md` defines image poster prompts.
-- `scripts/generate_openai_poster.py` generates poster PNG files via OpenAI Images API.
+- `scripts/generate_openai_poster.py` generates poster PNG files via OpenAI, MiniMax, Volcengine Ark, OpenRouter, or custom compatible endpoints.
 
 Configure OpenClaw heartbeat prompts:
 - Morning: "使用 ai-hot-radar 执行早报心跳。"
