@@ -95,7 +95,17 @@ python3 scripts/generate_openai_poster.py \
   --quality "medium"
 ```
 
-When successful, return the generated PNG path to the user and display the image if the UI supports local images.
+When successful, treat the provider image as the background. Then render the final readable poster with:
+
+```bash
+python3 scripts/render_news_poster.py \
+  --items-json "$MEMORY_ROOT/posters/latest-items.json" \
+  --background "$MEMORY_ROOT/posters/<provider-background>.png" \
+  --output "$MEMORY_ROOT/posters/ai-hot-radar-final-YYYY-MM-DD-HHMM.png" \
+  --time-window "<start> - <end>"
+```
+
+Return the final rendered PNG path to the user and display it if the UI supports local images. Do not rely on the image model to render Chinese text accurately; API-generated text may be garbled.
 
 ## Providers
 

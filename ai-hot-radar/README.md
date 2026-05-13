@@ -30,7 +30,8 @@ ai-hot-radar/
 │   ├── scoring-rubric.md
 │   └── source-map.md
 └── scripts/
-    └── generate_openai_poster.py
+    ├── generate_openai_poster.py
+    └── render_news_poster.py
 ```
 
 ## 安装
@@ -91,7 +92,7 @@ SKILL_DIR=$HOME/.codex/skills/ai-hot-radar \
 把今天 AI 热点做成一张小红书海报。
 ```
 
-默认用 OpenAI Images API，也可以在首次问卷或 `preferences.md` 里切换到 MiniMax、火山引擎方舟、OpenRouter 或自定义兼容接口。图片保存在：
+默认用 OpenAI Images API，也可以在首次问卷或 `preferences.md` 里切换到 MiniMax、火山引擎方舟、OpenRouter 或自定义兼容接口。生图 API 负责生成背景，本地脚本再叠加真实中文文字，避免海报乱码。图片保存在：
 
 ```text
 memory/posters/

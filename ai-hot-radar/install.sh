@@ -42,9 +42,11 @@ download "references/source-map.md" "$SKILL_DIR/references/source-map.md"
 download "references/output-style.md" "$SKILL_DIR/references/output-style.md"
 download "references/poster-guide.md" "$SKILL_DIR/references/poster-guide.md"
 download "scripts/generate_openai_poster.py" "$SKILL_DIR/scripts/generate_openai_poster.py"
+download "scripts/render_news_poster.py" "$SKILL_DIR/scripts/render_news_poster.py"
 download "agents/openai.yaml" "$SKILL_DIR/agents/openai.yaml"
 
 chmod +x "$SKILL_DIR/scripts/generate_openai_poster.py"
+chmod +x "$SKILL_DIR/scripts/render_news_poster.py"
 
 echo ""
 echo "Done."

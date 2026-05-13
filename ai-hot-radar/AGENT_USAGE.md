@@ -203,6 +203,8 @@ python3 scripts/generate_openai_poster.py \
 
 7. 返回生成的 PNG 路径，并在支持图片展示的 Agent UI 中展示图片。
 
+注意：不要依赖生图模型直接渲染中文正文。默认做法是先让 Provider 生成无文字科技背景，再用 `scripts/render_news_poster.py` 把真实中文标题、分数、判断和来源叠加到最终 PNG。
+
 支持的 Provider：
 
 | Provider | Key 环境变量 | 默认模型 |

@@ -266,10 +266,10 @@ Workflow:
 2. Select top 3-5 items by score.
 3. Read `references/poster-guide.md`.
 4. Compress each item for image text: short Chinese title plus 7-12 character judgment.
-5. Build a complete Chinese poster prompt with title, time window, Top 5, scores, and source footer.
+5. Build two files under `$MEMORY_ROOT/posters`: `latest-prompt.txt` for API background generation and `latest-items.json` for readable local text overlay.
 6. If `poster_mode: prompt`, output the prompt only.
 7. If `poster_mode: image`, require the selected provider's API key env var. If it is missing, stop and tell the user to configure it.
-8. Run:
+8. Generate an API background image. Ask the image provider for a clean technology infographic background with no text, then run:
 
 ```bash
 python3 scripts/generate_openai_poster.py \
@@ -282,7 +282,17 @@ python3 scripts/generate_openai_poster.py \
   --quality "medium"
 ```
 
-9. Return the generated PNG path and, if the agent UI supports it, display the image.
+9. Render the final readable Chinese poster by overlaying real text locally:
+
+```bash
+python3 scripts/render_news_poster.py \
+  --items-json "$MEMORY_ROOT/posters/latest-items.json" \
+  --background "$MEMORY_ROOT/posters/<provider-background>.png" \
+  --output "$MEMORY_ROOT/posters/ai-hot-radar-final-YYYY-MM-DD-HHMM.png" \
+  --time-window "<start> - <end>"
+```
+
+10. Return the final PNG path and, if the agent UI supports it, display the image. Treat provider-generated images with garbled text as backgrounds only; the final poster must use `render_news_poster.py` so Chinese text is readable.
 
 Provider table:
 
@@ -341,6 +351,7 @@ Install the folder as a normal OpenClaw skill. The skill is self-contained:
 - `references/output-style.md` defines Chinese editorial output.
 - `references/poster-guide.md` defines image poster prompts.
 - `scripts/generate_openai_poster.py` generates poster PNG files via OpenAI, MiniMax, Volcengine Ark, OpenRouter, or custom compatible endpoints.
+- `scripts/render_news_poster.py` overlays readable Chinese text on the generated background.
 
 Configure OpenClaw heartbeat prompts:
 - Morning: "使用 ai-hot-radar 执行早报心跳。"
