@@ -24,54 +24,57 @@ Do not silently fall back from image mode to prompt mode. If image mode is selec
 
 ```text
 标题：今日 AI 热点雷达
-副标题：过去 24 小时最值得关注的 5 件事
+副标题：过去 24 小时最值得关注的 AI 资讯
 时间窗：<start> - <end>
 
-Top 1: <score>｜<short Chinese title>｜<7-12 character judgment>
-Top 2: ...
-Top 3: ...
-Top 4: ...
-Top 5: ...
+Card 1:
+- 分数：<score>/100
+- 类型：<category>
+- 标题：<Chinese title>
+- 摘要：<one sentence summary>
+- 发布时间：<published_at>
+- 来源：<source>
+
+Card 2...
 
 底部：数据源：AI HOT / 官方 RSS / GitHub
 ```
 
 ## Prompt Template
 
+Use this prompt for the image provider background. Do not ask the image model to render Chinese news text; the local renderer handles all readable text.
+
 ```text
-生成一张 9:16 竖版中文 AI 资讯海报，适合小红书、朋友圈和公众号封面二次裁切。
+Generate a 9:16 vertical editorial AI news poster background. No readable text, no letters, no numbers, no fake UI labels.
 
-视觉风格：中文科技媒体信息图，干净、高级、层次清晰，白色或浅灰背景，蓝绿色点缀，少量渐变块，卡片式信息层级，深浅对比明确。避免赛博霓虹、避免杂乱背景、避免夸张 3D 机器人。
+Visual style: premium Chinese technology media, clean data-dashboard atmosphere, warm off-white background, deep teal and graphite accents, subtle paper grain, soft geometric gradients, faint abstract circuit lines, layered card-like spaces, high contrast but calm.
 
-版式要求：
-- 顶部大标题：今日 AI 热点雷达
-- 副标题：过去 24 小时最值得关注的 5 件事
-- 右上角小标签：AI NEWS / 24H
-- 中部用 5 个信息卡片展示热点，每张卡片包含分数、中文短标题、短判断
-- 底部小字：数据源：AI HOT / 官方 RSS / GitHub
-- 中文字体清晰可读，信息密度适中，留白充足
+Composition: leave a clean header area at the top, four large readable card zones in the middle, and a footer band at the bottom. Keep plenty of whitespace for text overlay. Make it look like a serious editorial briefing cover, not a cyberpunk poster.
 
-画面文字：
-1. <score>/100｜<short title>｜<short judgment>
-2. ...
+Avoid: cyberpunk neon, clutter, robots, human faces, fake text, fake Chinese characters, screenshots, dense charts, overdecorated 3D objects.
 ```
 
 ## Text Compression
 
-Poster text must be shorter than briefing text:
+Poster text must be detailed enough to be useful but still shorter than the full briefing:
 
-- Title: 8-18 Chinese characters when possible.
-- Judgment: 7-12 Chinese characters.
-- Avoid full URLs on the poster.
-- Avoid per-item source names unless the user asks.
+- Default detailed poster: top 4 items.
+- Each item must include title, summary, published time, source, category/type, and score.
+- Title: 12-24 Chinese characters when possible.
+- Summary: one short Chinese sentence, 24-42 Chinese characters.
+- Published time: compact, e.g. `2026-05-13 08:20`.
+- Source: source name or domain, not full URL.
 - Keep model, product, and company names recognizable.
 
 Examples:
 
 ```text
-83｜Claude 接入 AWS｜企业采购提速
-78｜OpenAI 推企业服务｜落地服务加码
-76｜新开源模型发布｜开发者可试用
+分数：83/100
+类型：产品
+标题：Claude Code 增加目标功能
+摘要：开发者可以把任务目标写进会话，减少偏航和返工。
+发布时间：2026-05-13 08:20
+来源：AI HOT
 ```
 
 ## Generation Command
@@ -102,7 +105,8 @@ python3 scripts/render_news_poster.py \
   --items-json "$MEMORY_ROOT/posters/latest-items.json" \
   --background "$MEMORY_ROOT/posters/<provider-background>.png" \
   --output "$MEMORY_ROOT/posters/ai-hot-radar-final-YYYY-MM-DD-HHMM.png" \
-  --time-window "<start> - <end>"
+  --time-window "<start> - <end>" \
+  --max-items 4
 ```
 
 Return the final rendered PNG path to the user and display it if the UI supports local images. Do not rely on the image model to render Chinese text accurately; API-generated text may be garbled.
@@ -114,7 +118,7 @@ Return the final rendered PNG path to the user and display it if the UI supports
 | `openai` | `OPENAI_API_KEY` | `gpt-image-1.5` | Uses OpenAI Images API. |
 | `minimax` | `MINIMAX_API_KEY` | `image-01` | Uses MiniMax image generation; ratio is controlled by `--aspect-ratio`. |
 | `volcengine` | `ARK_API_KEY` or `VOLCENGINE_API_KEY` | `doubao-seedream-4-5-251128` | Uses Volcengine Ark image generation; users may need to replace the model with their enabled Seedream model. |
-| `openrouter` | `OPENROUTER_API_KEY` | `google/gemini-3.1-flash-image-preview` | Uses OpenRouter chat completions with image output; users may choose any image-output model they have access to. |
+| `openrouter` | `OPENROUTER_API_KEY` | `recraft/recraft-v4` | Uses OpenRouter chat completions with image output; users may choose any image-output model they have access to. |
 | `custom` | `AI_HOT_RADAR_IMAGE_API_KEY` | user-defined | Requires `--api-url` or `AI_HOT_RADAR_IMAGE_API_URL`; expects OpenAI-compatible image generation output. |
 
 Provider examples:
@@ -135,7 +139,7 @@ python3 scripts/generate_openai_poster.py --provider volcengine \
 python3 scripts/generate_openai_poster.py --provider openrouter \
   --prompt-file "$MEMORY_ROOT/posters/latest-prompt.txt" \
   --output-dir "$MEMORY_ROOT/posters" \
-  --model "google/gemini-3.1-flash-image-preview"
+  --model "recraft/recraft-v4"
 ```
 
 ## Missing API Key

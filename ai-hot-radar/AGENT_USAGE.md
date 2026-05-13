@@ -203,7 +203,7 @@ python3 scripts/generate_openai_poster.py \
 
 7. 返回生成的 PNG 路径，并在支持图片展示的 Agent UI 中展示图片。
 
-注意：不要依赖生图模型直接渲染中文正文。默认做法是先让 Provider 生成无文字科技背景，再用 `scripts/render_news_poster.py` 把真实中文标题、分数、判断和来源叠加到最终 PNG。
+注意：不要依赖生图模型直接渲染中文正文。默认做法是先让 Provider 生成无文字科技背景，再用 `scripts/render_news_poster.py` 把真实中文标题、摘要、发布时间、来源、类型和分数叠加到最终 PNG。
 
 支持的 Provider：
 
@@ -212,7 +212,7 @@ python3 scripts/generate_openai_poster.py \
 | OpenAI | `OPENAI_API_KEY` | `gpt-image-1.5` |
 | MiniMax | `MINIMAX_API_KEY` | `image-01` |
 | 火山引擎方舟 | `ARK_API_KEY` 或 `VOLCENGINE_API_KEY` | `doubao-seedream-4-5-251128` |
-| OpenRouter | `OPENROUTER_API_KEY` | `google/gemini-3.1-flash-image-preview` |
+| OpenRouter | `OPENROUTER_API_KEY` | `recraft/recraft-v4` |
 | 自定义兼容接口 | `AI_HOT_RADAR_IMAGE_API_KEY` | 用户自定义 |
 
 如果缺少 key，输出：

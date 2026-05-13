@@ -265,7 +265,7 @@ Workflow:
 1. Generate the Chinese editorial cards first.
 2. Select top 3-5 items by score.
 3. Read `references/poster-guide.md`.
-4. Compress each item for image text: short Chinese title plus 7-12 character judgment.
+4. Build detailed poster cards. Each item must include `score`, `title`, `summary`, `published_at`, `source`, and `category`.
 5. Build two files under `$MEMORY_ROOT/posters`: `latest-prompt.txt` for API background generation and `latest-items.json` for readable local text overlay.
 6. If `poster_mode: prompt`, output the prompt only.
 7. If `poster_mode: image`, require the selected provider's API key env var. If it is missing, stop and tell the user to configure it.
@@ -289,10 +289,11 @@ python3 scripts/render_news_poster.py \
   --items-json "$MEMORY_ROOT/posters/latest-items.json" \
   --background "$MEMORY_ROOT/posters/<provider-background>.png" \
   --output "$MEMORY_ROOT/posters/ai-hot-radar-final-YYYY-MM-DD-HHMM.png" \
-  --time-window "<start> - <end>"
+  --time-window "<start> - <end>" \
+  --max-items 4
 ```
 
-10. Return the final PNG path and, if the agent UI supports it, display the image. Treat provider-generated images with garbled text as backgrounds only; the final poster must use `render_news_poster.py` so Chinese text is readable.
+10. Return the final PNG path and, if the agent UI supports it, display the image. Treat provider-generated images with garbled text as backgrounds only; the final poster must use `render_news_poster.py` so Chinese text is readable and every visible news card contains title, summary, publish time, source, type, and score.
 
 Provider table:
 
@@ -301,7 +302,7 @@ Provider table:
 | OpenAI | `openai` | `OPENAI_API_KEY` | `gpt-image-1.5` | `https://api.openai.com/v1/images/generations` |
 | MiniMax | `minimax` | `MINIMAX_API_KEY` | `image-01` | `https://api.minimaxi.com/v1/image_generation` |
 | 火山引擎方舟 | `volcengine` | `ARK_API_KEY` or `VOLCENGINE_API_KEY` | `doubao-seedream-4-5-251128` | `https://ark.cn-beijing.volces.com/api/v3/images/generations` |
-| OpenRouter | `openrouter` | `OPENROUTER_API_KEY` | `google/gemini-3.1-flash-image-preview` | `https://openrouter.ai/api/v1/chat/completions` |
+| OpenRouter | `openrouter` | `OPENROUTER_API_KEY` | `recraft/recraft-v4` | `https://openrouter.ai/api/v1/chat/completions` |
 | 自定义兼容接口 | `custom` | `AI_HOT_RADAR_IMAGE_API_KEY` | user-defined | set `api_url` or `AI_HOT_RADAR_IMAGE_API_URL` |
 
 API key instruction when missing:

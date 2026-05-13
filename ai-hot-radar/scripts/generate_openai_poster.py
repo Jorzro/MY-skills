@@ -47,7 +47,7 @@ PROVIDER_DEFAULTS = {
     "openrouter": {
         "api_url": "https://openrouter.ai/api/v1/chat/completions",
         "api_key_envs": ["OPENROUTER_API_KEY"],
-        "model": "google/gemini-3.1-flash-image-preview",
+        "model": "recraft/recraft-v4",
     },
     "custom": {
         "api_url": "",
@@ -128,11 +128,14 @@ def build_payload(args: argparse.Namespace, prompt: str, model: str) -> dict[str
         }
 
     if args.provider == "openrouter":
+        image_config = {"aspect_ratio": args.aspect_ratio}
+        if args.size in {"1K", "2K", "4K"}:
+            image_config["image_size"] = args.size
         return {
             "model": model,
             "messages": [{"role": "user", "content": prompt}],
-            "modalities": ["image", "text"],
-            "image_config": {"aspect_ratio": args.aspect_ratio},
+            "modalities": ["image"],
+            "image_config": image_config,
             "stream": False,
         }
 
