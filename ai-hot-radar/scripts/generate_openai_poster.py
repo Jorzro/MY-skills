@@ -35,7 +35,7 @@ PROVIDER_DEFAULTS = {
         "model": "gpt-image-1.5",
     },
     "minimax": {
-        "api_url": "https://api.minimax.io/v1/image_generation",
+        "api_url": "https://api.minimaxi.com/v1/image_generation",
         "api_key_envs": ["MINIMAX_API_KEY"],
         "model": "image-01",
     },

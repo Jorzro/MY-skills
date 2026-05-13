@@ -289,7 +289,7 @@ Provider table:
 | Provider | `poster_provider` | Default key env | Default model | Endpoint |
 |---|---|---|---|---|
 | OpenAI | `openai` | `OPENAI_API_KEY` | `gpt-image-1.5` | `https://api.openai.com/v1/images/generations` |
-| MiniMax | `minimax` | `MINIMAX_API_KEY` | `image-01` | `https://api.minimax.io/v1/image_generation` |
+| MiniMax | `minimax` | `MINIMAX_API_KEY` | `image-01` | `https://api.minimaxi.com/v1/image_generation` |
 | 火山引擎方舟 | `volcengine` | `ARK_API_KEY` or `VOLCENGINE_API_KEY` | `doubao-seedream-4-5-251128` | `https://ark.cn-beijing.volces.com/api/v3/images/generations` |
 | OpenRouter | `openrouter` | `OPENROUTER_API_KEY` | `google/gemini-3.1-flash-image-preview` | `https://openrouter.ai/api/v1/chat/completions` |
 | 自定义兼容接口 | `custom` | `AI_HOT_RADAR_IMAGE_API_KEY` | user-defined | set `api_url` or `AI_HOT_RADAR_IMAGE_API_URL` |
